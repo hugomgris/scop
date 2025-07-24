@@ -1,6 +1,6 @@
 # scop-fdf3d
 
-🚀 Hybrid project for 42's `scop` and Hugo's `FDF3D` side project.  
+🚀 Hybrid project for 42's `scop` and a C++ `FDF3D` side project.  
 🎮 Goal: Build a modular 3D object viewer with OpenGL in C++, supporting multiple rendering modes (solid, wireframe, FDF-style, textured).
 
 ---
