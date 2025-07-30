@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 17:20:18 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:21:07 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ struct ShaderProgramSource {
 	std::string FragmentSource;
 };
 
-App::App(Parser *parser) : _parser(parser), window(nullptr) {
+App::App(Mesh *mesh) : _mesh(mesh), window(nullptr) {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW\n";
 		return;
@@ -148,28 +148,8 @@ static unsigned int createShader(const std::string &vertexShader, const std::str
 void App::run() {
     if (!window) return;
 
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _parser->getVertices().size(), _parser->getVertices().data(), GL_STATIC_DRAW);
-
-	unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * _parser->getIndices().size(), _parser->getIndices().data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	_mesh->bind();
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //WIREFRAME mode
 
 	ShaderProgramSource shaderSource = ParseShader("resources/shaders/Basic.shader");
     unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
@@ -179,69 +159,14 @@ void App::run() {
         glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, (GLsizei)_parser->getIndices().size(), GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(_mesh->getVAO());
+        glDrawElements(GL_TRIANGLES, (GLsizei)_mesh->getIndexCount(), GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     glDeleteProgram(shader);
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &buffer);
-} 
-
-/*
-void App::run() {
-    if (!window) return;
-
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    float positions[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-		-0.5f,  0.5f,
-    };
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, positions, GL_STATIC_DRAW);
-
-	unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-
-	ShaderProgramSource shaderSource = ParseShader("resources/shaders/Basic.shader");
-
-    unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
-    glUseProgram(shader);
-
-    while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glDeleteProgram(shader);
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &buffer);
+    /* glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &buffer); */
 }
-*/

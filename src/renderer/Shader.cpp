@@ -6,11 +6,11 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 14:16:51 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:29:30 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Shader.hpp"
+#include "../../include/Shader.hpp"
 #include <glad/glad.h>
 #include <iostream>
 
