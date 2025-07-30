@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 17:16:42 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:41:55 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@
 #include "glm/gtc/type_ptr.hpp"
 
 struct ShaderProgramSource {
-	std::string VertexSource;
-	std::string FragmentSource;
+	std::string vertexSource;
+	std::string fragmentSource;
 };
 
 App::App(Parser *parser) : _parser(parser), window(nullptr) {
@@ -175,7 +175,7 @@ void App::run() {
 
 	ShaderProgramSource shaderSource = ParseShader("resources/shaders/Basic.shader");
 
-    unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
+    unsigned int shader = createShader(shaderSource.vertexSource, shaderSource.fragmentSource);
     glUseProgram(shader);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

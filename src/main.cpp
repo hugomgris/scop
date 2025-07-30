@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 18:11:36 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:45:19 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../include/App.hpp"
 #include "../include/Parser.hpp"
 #include "../include/Mesh.hpp"
+#include "../include/Shader.hpp"
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -27,7 +28,8 @@ int main(int argc, char** argv) {
         parser.checkExtension(argv[1]);
         
         Mesh mesh(&parser);
-        App app(&mesh);
+        Shader shader("resources/shaders/Basic.shader");
+        App app(&mesh, &shader);
 
         app.run();
 
