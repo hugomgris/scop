@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 14:16:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 15:29:45 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <iostream>
 #include <glm/glm.hpp>
 
 struct Vertex {

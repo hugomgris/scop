@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 14:16:56 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/30 15:34:57 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,17 @@ int main(int argc, char** argv) {
         std::cerr << "Usage: " << argv[0] << " <path_to_obj_file>\n";
         return 1;
     }
-    /* App app;
-    app.run();
-    return 0; */
+
     Parser parser;
+    App app(&parser);
+
     try {
         parser.checkExtension(argv[1]);
         
         parser.parse(argv[1]);
+        app.run();
+
+        //debug print
         const auto &vertices = parser.getVertices();
         const auto &indices = parser.getIndices();
         std::cout << "Parsed " << vertices.size() << " vertices and " << indices.size() << " indices." << std::endl;

@@ -1,0 +1,180 @@
+# Complex Geometric Pattern
+# Hexagon with triangular subdivisions and star overlay
+o GeometricPattern
+
+# Central hexagon vertices
+v  0.0    0.0    0.0   # 1 - center
+v  0.2    0.0    0.0   # 2 - right
+v  0.1    0.173  0.0   # 3 - top-right
+v -0.1    0.173  0.0   # 4 - top-left
+v -0.2    0.0    0.0   # 5 - left
+v -0.1   -0.173  0.0   # 6 - bottom-left
+v  0.1   -0.173  0.0   # 7 - bottom-right
+
+# Outer hexagon ring
+v  0.4    0.0    0.0   # 8 - outer right
+v  0.2    0.346  0.0   # 9 - outer top-right
+v -0.2    0.346  0.0   # 10 - outer top-left
+v -0.4    0.0    0.0   # 11 - outer left
+v -0.2   -0.346  0.0   # 12 - outer bottom-left
+v  0.2   -0.346  0.0   # 13 - outer bottom-right
+
+# Intermediate vertices for triangular subdivisions
+v  0.3    0.0    0.0   # 14 - mid right
+v  0.15   0.26   0.0   # 15 - mid top-right
+v -0.15   0.26   0.0   # 16 - mid top-left
+v -0.3    0.0    0.0   # 17 - mid left
+v -0.15  -0.26   0.0   # 18 - mid bottom-left
+v  0.15  -0.26   0.0   # 19 - mid bottom-right
+
+# Star overlay vertices
+v  0.0    0.35   0.0   # 20 - star top
+v  0.303  0.175  0.0   # 21 - star top-right
+v  0.303 -0.175  0.0   # 22 - star bottom-right
+v  0.0   -0.35   0.0   # 23 - star bottom
+v -0.303 -0.175  0.0   # 24 - star bottom-left
+v -0.303  0.175  0.0   # 25 - star top-left
+
+# Star inner vertices (for 6-pointed star)
+v  0.1    0.115  0.0   # 26 - star inner top-right
+v  0.1   -0.115  0.0   # 27 - star inner bottom-right
+v -0.1   -0.115  0.0   # 28 - star inner bottom-left
+v -0.1    0.115  0.0   # 29 - star inner top-left
+v  0.0    0.13   0.0   # 30 - star inner top
+v  0.0   -0.13   0.0   # 31 - star inner bottom
+
+# Decorative corner vertices
+v  0.5    0.5    0.0   # 32 - corner top-right
+v -0.5    0.5    0.0   # 33 - corner top-left
+v -0.5   -0.5    0.0   # 34 - corner bottom-left
+v  0.5   -0.5    0.0   # 35 - corner bottom-right
+
+v  0.45   0.15   0.0   # 36 - corner detail
+v  0.15   0.45   0.0   # 37
+v -0.15   0.45   0.0   # 38
+v -0.45   0.15   0.0   # 39
+v -0.45  -0.15   0.0   # 40
+v -0.15  -0.45   0.0   # 41
+v  0.15  -0.45   0.0   # 42
+v  0.45  -0.15   0.0   # 43
+
+# Texture coordinates
+vt 0.5   0.5     # 1 - center
+vt 0.6   0.5     # 2-7 - inner hex
+vt 0.55  0.587
+vt 0.45  0.587
+vt 0.4   0.5
+vt 0.45  0.413
+vt 0.55  0.413
+
+vt 0.7   0.5     # 8-13 - outer hex
+vt 0.6   0.673
+vt 0.4   0.673
+vt 0.3   0.5
+vt 0.4   0.327
+vt 0.6   0.327
+
+vt 0.65  0.5     # 14-19 - mid points
+vt 0.575 0.63
+vt 0.425 0.63
+vt 0.35  0.5
+vt 0.425 0.37
+vt 0.575 0.37
+
+vt 0.5   0.675   # 20-25 - star points
+vt 0.651 0.588
+vt 0.651 0.412
+vt 0.5   0.325
+vt 0.349 0.412
+vt 0.349 0.588
+
+vt 0.55  0.562   # 26-31 - star inner
+vt 0.55  0.438
+vt 0.45  0.438
+vt 0.45  0.562
+vt 0.5   0.575
+vt 0.5   0.425
+
+vt 0.85  0.85    # 32-35 - corners
+vt 0.15  0.85
+vt 0.15  0.15
+vt 0.85  0.15
+
+vt 0.825 0.575   # 36-43 - corner details
+vt 0.575 0.825
+vt 0.425 0.825
+vt 0.175 0.575
+vt 0.175 0.425
+vt 0.425 0.175
+vt 0.575 0.175
+vt 0.825 0.425
+
+# Normals
+vn 0.0 0.0 1.0
+
+# Central hexagon faces
+f 1/1/1 2/2/1 3/3/1
+f 1/1/1 3/3/1 4/4/1
+f 1/1/1 4/4/1 5/5/1
+f 1/1/1 5/5/1 6/6/1
+f 1/1/1 6/6/1 7/7/1
+f 1/1/1 7/7/1 2/2/1
+
+# Hexagon ring subdivisions
+f 2/2/1 14/14/1 15/15/1
+f 2/2/1 15/15/1 3/3/1
+f 3/3/1 15/15/1 16/16/1
+f 3/3/1 16/16/1 4/4/1
+f 4/4/1 16/16/1 17/17/1
+f 4/4/1 17/17/1 5/5/1
+f 5/5/1 17/17/1 18/18/1
+f 5/5/1 18/18/1 6/6/1
+f 6/6/1 18/18/1 19/19/1
+f 6/6/1 19/19/1 7/7/1
+f 7/7/1 19/19/1 14/14/1
+f 7/7/1 14/14/1 2/2/1
+
+# Outer hexagon ring
+f 14/14/1 8/8/1 9/9/1
+f 14/14/1 9/9/1 15/15/1
+f 15/15/1 9/9/1 10/10/1
+f 15/15/1 10/10/1 16/16/1
+f 16/16/1 10/10/1 11/11/1
+f 16/16/1 11/11/1 17/17/1
+f 17/17/1 11/11/1 12/12/1
+f 17/17/1 12/12/1 18/18/1
+f 18/18/1 12/12/1 13/13/1
+f 18/18/1 13/13/1 19/19/1
+f 19/19/1 13/13/1 8/8/1
+f 19/19/1 8/8/1 14/14/1
+
+# 6-pointed star overlay
+f 30/30/1 26/26/1 20/20/1
+f 26/26/1 21/21/1 20/20/1
+f 26/26/1 27/27/1 21/21/1
+f 27/27/1 22/22/1 21/21/1
+f 27/27/1 31/31/1 22/22/1
+f 31/31/1 23/23/1 22/23/1
+f 31/31/1 28/28/1 23/23/1
+f 28/28/1 24/24/1 23/23/1
+f 28/28/1 29/29/1 24/24/1
+f 29/29/1 25/25/1 24/24/1
+f 29/29/1 30/30/1 25/25/1
+f 30/30/1 20/20/1 25/25/1
+
+# Corner decorative elements
+f 8/8/1 36/36/1 32/32/1
+f 9/9/1 37/37/1 32/32/1
+f 9/9/1 32/32/1 36/36/1
+f 10/10/1 38/38/1 33/33/1
+f 10/10/1 33/33/1 37/37/1
+f 11/11/1 39/39/1 33/33/1
+f 11/11/1 33/33/1 38/38/1
+f 12/12/1 40/40/1 34/34/1
+f 12/12/1 34/34/1 39/39/1
+f 13/13/1 41/41/1 34/34/1
+f 13/13/1 34/34/1 40/40/1
+f 8/8/1 42/42/1 35/35/1
+f 8/8/1 35/35/1 41/41/1
+f 8/8/1 43/43/1 35/35/1
+f 8/8/1 35/35/1 42/42/1
