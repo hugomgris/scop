@@ -1,22 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Renderer.cpp                                       :+:      :+:    :+:   */
+/*   Mesh.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 14:16:09 by hmunoz-g         ###   ########.fr       */
+/*   Created: 2025/07/30 14:16:25 by hmunoz-g          #+#    #+#             */
+/*   Updated: 2025/07/30 14:16:25 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/Renderer.hpp"
-#include <glad/glad.h>
+#pragma once
 
-Renderer::Renderer() {}
+class Mesh {
+private:
+    unsigned int VAO, VBO;
+    int vertexCount;
 
-void Renderer::draw(const Mesh& mesh, const Shader& shader) {
-    shader.use();
-    mesh.bind();
-    glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
-}
+public:
+    Mesh();
+    ~Mesh();
+    void bind() const;
+    int getVertexCount() const;
+};

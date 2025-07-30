@@ -1,22 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Renderer.cpp                                       :+:      :+:    :+:   */
+/*   Renderer.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 14:16:09 by hmunoz-g         ###   ########.fr       */
+/*   Created: 2025/07/30 14:16:20 by hmunoz-g          #+#    #+#             */
+/*   Updated: 2025/07/30 14:16:20 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/Renderer.hpp"
-#include <glad/glad.h>
+#pragma once
+#include "Mesh.hpp"
+#include "Shader.hpp"
 
-Renderer::Renderer() {}
-
-void Renderer::draw(const Mesh& mesh, const Shader& shader) {
-    shader.use();
-    mesh.bind();
-    glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
-}
+class Renderer {
+public:
+    Renderer();
+    void draw(const Mesh& mesh, const Shader& shader);
+};

@@ -47,6 +47,7 @@ endif
 GLAD_SRC    := include/glad/src/glad.c
 
 SRC         := src/main.cpp \
+			   src/parser/Parser.cpp \
 			   src/app/App.cpp \
 			   src/renderer/Renderer.cpp \
 			   src/renderer/Shader.cpp \
@@ -63,11 +64,13 @@ all: directories glm $(NAME)
 
 directories:
 	@mkdir -p $(OBJ_DIR)/src/app
+	@mkdir -p $(OBJ_DIR)/src/parser
 	@mkdir -p $(OBJ_DIR)/src/obj
 	@mkdir -p $(OBJ_DIR)/src/renderer
 	@mkdir -p $(OBJ_DIR)/src/utils
 	@mkdir -p $(OBJ_DIR)/include/glad/src
 	@mkdir -p $(DEP_DIR)/src/app
+	@mkdir -p $(DEP_DIR)/src/parser
 	@mkdir -p $(DEP_DIR)/src/obj
 	@mkdir -p $(DEP_DIR)/src/renderer
 	@mkdir -p $(DEP_DIR)/src/utils
@@ -99,21 +102,44 @@ $(NAME): $(OBJS) Makefile
 	@echo "$(GREEN)$(NAME) compiled!$(DEF_COLOR)"
 	@echo "$(CYAN)I have become scop, the renderer of worlds!$(DEF_COLOR)"
 
-run: $(NAME)
-	@echo "$(BLUE)Running $(NAME) with teapot.obj$(DEF_COLOR)"
-	./$(NAME) resources/teapot.obj
+# -=-=-=-=-    DOCUMENTATION -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-run42: $(NAME)
-	@echo "$(BLUE)Running $(NAME) with 42.obj$(DEF_COLOR)"
-	./$(NAME) resources/42.obj
+DOXYGEN_VERSION = 1.10.0
+DOXYGEN_DIR = $(HOME)/doxygen-$(DOXYGEN_VERSION)
+DOXYGEN_BIN = $(DOXYGEN_DIR)/bin/doxygen
 
-doxy:
-	doxygen Doxyfile 2>/dev/null || echo "$(YELLOW)Doxyfile not found, skipping documentation$(DEF_COLOR)"
-	@echo "$(GREEN)Documentation generated (if Doxyfile exists)$(DEF_COLOR)"
+# Generate project documentation using Doxygen
+# NOTE: This target will work with or without Graphviz installed:
+#   - WITH Graphviz: Generates full docs including dependency graphs, call graphs,
+#     class collaboration diagrams, and inheritance charts
+#   - WITHOUT Graphviz: Generates complete documentation but without visual graphs
+#
+# To enable visual graphs, install Graphviz on your system:
+#   Ubuntu/Debian: sudo apt-get install graphviz
+#   macOS: brew install graphviz
+#   Arch: sudo pacman -S graphviz
+doxy: $(DOXYGEN_BIN)
+	@if command -v dot >/dev/null 2>&1; then \
+		echo "$(GREEN)Generating documentation with Graphviz support$(DEF_COLOR)"; \
+	else \
+		echo "$(YELLOW)Generating documentation without graphs (Graphviz not found)$(DEF_COLOR)"; \
+		echo "$(CYAN)Tip: Install graphviz package to enable dependency graphs$(DEF_COLOR)"; \
+	fi
+	@$(DOXYGEN_BIN) Doxyfile
+	@echo "$(GREEN)Documentation generated in docs/html/index.html$(DEF_COLOR)"
+
+$(DOXYGEN_BIN):
+	@echo "$(CYAN)Downloading Doxygen$(DEF_COLOR)"
+	@wget -q https://www.doxygen.nl/files/doxygen-$(DOXYGEN_VERSION).linux.bin.tar.gz -O /tmp/doxygen.tar.gz
+	@tar -xzf /tmp/doxygen.tar.gz -C $(HOME)
+	@rm /tmp/doxygen.tar.gz
+	@echo "$(GREEN)Doxygen installed successfully$(DEF_COLOR)"
 
 doxyclean:
-	rm -rf docs/html/ docs/latex/ docs/xml/ docs/rtf/ docs/man/ docs/docbook/
+	@rm -rf docs/html/ docs/latex/ docs/xml/ docs/rtf/ docs/man/ docs/docbook/
 	@echo "$(RED)Cleaned documentation files$(DEF_COLOR)"
+
+# -=-=-=-=-    CLEANUP -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 clean:
 	@$(RM) $(OBJ_DIR) $(DEP_DIR)
@@ -129,7 +155,7 @@ re: fclean all
 
 list-models:
 	@echo "$(CYAN)Available 3D models:$(DEF_COLOR)"
-	@ls -1 resources/*.obj 2>/dev/null || echo "$(RED)No .obj files found in resources/$(DEF_COLOR)"
+	@ls -1 resources/objects/*.obj 2>/dev/null || echo "$(RED)No .obj files found in resources/$(DEF_COLOR)"
 
 check-deps:
 	@echo "$(CYAN)Checking OpenGL dependencies...$(DEF_COLOR)"
