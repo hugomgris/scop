@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 12:09:50 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 18:04:20 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ class Parser {
 
 		const std::vector<Vertex> &getVertices() const;
 		const std::vector<unsigned int> &getIndices() const;
+		size_t getRows() const;
+		size_t getColumns() const;
 		int getMode() const;
 
 		void setMode(std::string &filePath);
@@ -94,5 +96,5 @@ class Parser {
 
 		//FDF stuff
 		size_t _cols, _rows;
-		int _xSpacing, _ySpacing, _zSpacing;
+		float _xSpacing, _ySpacing, _zSpacing;
 };

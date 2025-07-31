@@ -49,6 +49,7 @@ GLAD_SRC    := include/glad/src/glad.c
 SRC         := src/main.cpp \
 			   src/parser/Parser.cpp \
 			   src/app/App.cpp \
+			   src/app/InputManager.cpp \
 			   src/renderer/Renderer.cpp \
 			   src/renderer/Shader.cpp \
 			   src/renderer/Mesh.cpp \

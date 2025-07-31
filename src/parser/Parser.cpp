@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 12:09:26 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 18:05:25 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <unordered_map>
 #include <stdexcept>
 #include <glm/glm.hpp>
@@ -31,6 +32,14 @@ void Parser::setMode(std::string &filePath) {
 	} else if (filePath.substr(filePath.find_last_of(".") + 1) == "fdf") {
 		_mode = FDF;
 	}
+}
+
+size_t Parser::getRows() const {
+    return _rows;
+}
+
+size_t Parser::getColumns() const {
+    return _cols;
 }
 
 int Parser::getMode() const {
@@ -233,7 +242,7 @@ void Parser::countFDFPositions(const std::string &filePath) {
 
     std::string line;
     while (std::getline(file, line)) {
-        if (line.empty()) continue; // Skip empty lines
+        if (line.empty()) continue;
         
         _rows++;
 
@@ -249,30 +258,35 @@ void Parser::countFDFPositions(const std::string &filePath) {
 }
 
 void Parser::calculateFDFSpacing() {
-    // Base spacing unit - adjust this value to scale the entire map
     const float BASE_SPACING = 1.0f;
     
-    // Calculate spacing based on map dimensions for consistent scale
-    // Larger maps get smaller spacing to fit better on screen
     float scaleFactor = 1.0f;
     
-    // Scale down for larger maps
-    if (_rows > 50 || _cols > 50) {
-        scaleFactor = 0.5f;
-    } else if (_rows > 100 || _cols > 100) {
+    if (_rows > 100 || _cols > 100) {
         scaleFactor = 0.25f;
+    } else if (_rows > 50 || _cols > 50) {
+        scaleFactor = 0.5f;
     }
     
-    // Calculate spacing to maintain aspect ratio
-    float maxDimension = std::max(_rows, _cols);
-    if (maxDimension > 10) {
-        scaleFactor *= (10.0f / maxDimension);
+    float maxDimension = static_cast<float>(std::max(_rows, _cols));
+    if (maxDimension > 20) {
+        scaleFactor *= (20.0f / maxDimension);
     }
     
     _xSpacing = BASE_SPACING * scaleFactor;
     _ySpacing = BASE_SPACING * scaleFactor;
-    
     _zSpacing = BASE_SPACING * scaleFactor * 0.1f;
+    
+    const float MIN_SPACING = 0.1f;
+    _xSpacing = std::max(_xSpacing, MIN_SPACING);
+    _ySpacing = std::max(_ySpacing, MIN_SPACING);
+    _zSpacing = std::max(_zSpacing, MIN_SPACING * 0.1f);
+    
+    if (maxDimension > 500) {
+        float largeMapMultiplier = 5.0f;
+        _xSpacing *= largeMapMultiplier;
+        _ySpacing *= largeMapMultiplier;
+    }
 }
 
 const std::vector<Vertex> &Parser::getVertices() const {

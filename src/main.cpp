@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 10:50:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 18:01:14 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,15 @@ int main(int argc, char** argv) {
         parser.parse(argv[1]);
         
         Mesh mesh(&parser);
-        Shader shader("resources/shaders/Basic.shader");
-        Renderer renderer;
+        Shader shader("resources/shaders/3D.shader");
+        Renderer renderer(&shader);
 
-        App app(&mesh, &shader, &renderer, parser.getMode());
+        App app(parser.getMode(), &mesh, &shader, &renderer, &parser);
 
         app.run();
 
         //debug print
-        const auto &vertices = parser.getVertices();
+        /* const auto &vertices = parser.getVertices();
         const auto &indices = parser.getIndices();
         std::cout << "Parsed " << vertices.size() << " vertices and " << indices.size() << " indices." << std::endl;
         for (const auto &vertex : vertices) {
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         }
         for (const auto &index : indices) {
             std::cout << "Index: " << index << std::endl;
-        }
+        } */
     }
     catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;
