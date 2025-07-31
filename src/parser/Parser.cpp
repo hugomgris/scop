@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 15:39:26 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 12:09:26 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,18 @@ Parser::Parser() {}
 
 Parser::~Parser() {}
 
+void Parser::setMode(std::string &filePath) {
+	if (filePath.substr(filePath.find_last_of(".") + 1) == "obj") {
+		_mode = OBJ;
+	} else if (filePath.substr(filePath.find_last_of(".") + 1) == "fdf") {
+		_mode = FDF;
+	}
+}
+
+int Parser::getMode() const {
+    return _mode;
+}
+
 void Parser::checkExtension(const std::string &filePath) const {
 	if (filePath.empty()) {
 		throw std::runtime_error("File path cannot be empty");
@@ -39,12 +51,22 @@ void Parser::checkExtension(const std::string &filePath) const {
 		throw std::runtime_error("File must have an extension");
 	}
 	
-	if (filePath.substr(filePath.find_last_of(".") + 1) != "obj") {
-		throw std::runtime_error("File must have .obj extension");
+	if (filePath.substr(filePath.find_last_of(".") + 1) != "obj"
+        && filePath.substr(filePath.find_last_of(".") + 1) != "fdf") {
+		throw std::runtime_error("File must have .obj or .fdf extension");
 	}
 }
 
+
 void Parser::parse(const std::string &filePath) {
+    if (_mode == OBJ) {
+        parseOBJ(filePath);
+    } else if (_mode == FDF) {
+        parseFDF(filePath);
+    }
+}
+
+void Parser::parseOBJ(const std::string &filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file. Check permissions.");
@@ -129,6 +151,128 @@ void Parser::parse(const std::string &filePath) {
             }
         }
     }
+}
+
+void Parser::parseFDF(const std::string &filePath) {
+    countFDFPositions(filePath);
+    calculateFDFSpacing();
+    
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file. Check permissions.");
+    }
+    
+    std::vector<std::vector<int>> mapLayout;
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+        
+        std::istringstream iss(line);
+        std::string vertexStr;
+        std::vector<int> mapLine;
+
+        while (iss >> vertexStr) {
+            // Handle hex colors if present (format: value,0xcolor)
+            size_t commaPos = vertexStr.find(',');
+            if (commaPos != std::string::npos) {
+                vertexStr = vertexStr.substr(0, commaPos);
+            }
+            mapLine.push_back(std::stoi(vertexStr));
+        }
+        
+        if (!mapLine.empty()) {
+            mapLayout.push_back(mapLine);
+        }
+    }
+
+    // Generate vertices from the 2D grid
+    for (size_t i = 0; i < mapLayout.size(); i++) {
+        for (size_t j = 0; j < mapLayout[i].size(); j++) {
+            glm::vec3 position;
+            // Center the map around origin
+            position.x = (j - (_cols - 1) / 2.0f) * _xSpacing;
+            position.y = ((_rows - 1) / 2.0f - i) * _ySpacing;
+            position.z = mapLayout[i][j] * _zSpacing;
+            _positions.push_back(position);
+
+            Vertex vertexData;
+            vertexData.position = position;
+            vertexData.texCoord = glm::vec2(0.f);
+            vertexData.normal = glm::vec3(0.f, 0.f, 1.f); // Default normal pointing up
+            _vertices.push_back(vertexData);
+        }
+    }
+
+    // Generate line indices - connect each vertex to right and down neighbors
+    for (size_t i = 0; i < _rows; i++) {
+        for (size_t j = 0; j < _cols; j++) {
+            size_t currentIndex = i * _cols + j;
+
+            if (j < _cols - 1) {
+                _indices.push_back(currentIndex);
+                _indices.push_back(currentIndex + 1);
+            }
+
+            if (i < _rows - 1) {
+                _indices.push_back(currentIndex);
+                _indices.push_back(currentIndex + _cols);
+            }
+        }
+    }
+}
+
+void Parser::countFDFPositions(const std::string &filePath) {
+    _rows = 0;
+    _cols = 0;
+    bool countedCols = false;
+
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file. Check permissions.");
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue; // Skip empty lines
+        
+        _rows++;
+
+        if (!countedCols) {
+            std::istringstream iss(line);
+            std::string token;
+            while (iss >> token) {
+                _cols++;
+            }
+            countedCols = true;
+        }
+    }
+}
+
+void Parser::calculateFDFSpacing() {
+    // Base spacing unit - adjust this value to scale the entire map
+    const float BASE_SPACING = 1.0f;
+    
+    // Calculate spacing based on map dimensions for consistent scale
+    // Larger maps get smaller spacing to fit better on screen
+    float scaleFactor = 1.0f;
+    
+    // Scale down for larger maps
+    if (_rows > 50 || _cols > 50) {
+        scaleFactor = 0.5f;
+    } else if (_rows > 100 || _cols > 100) {
+        scaleFactor = 0.25f;
+    }
+    
+    // Calculate spacing to maintain aspect ratio
+    float maxDimension = std::max(_rows, _cols);
+    if (maxDimension > 10) {
+        scaleFactor *= (10.0f / maxDimension);
+    }
+    
+    _xSpacing = BASE_SPACING * scaleFactor;
+    _ySpacing = BASE_SPACING * scaleFactor;
+    
+    _zSpacing = BASE_SPACING * scaleFactor * 0.1f;
 }
 
 const std::vector<Vertex> &Parser::getVertices() const {

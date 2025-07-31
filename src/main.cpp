@@ -6,15 +6,17 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 18:45:19 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 10:50:04 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <string>
 #include "../include/App.hpp"
 #include "../include/Parser.hpp"
 #include "../include/Mesh.hpp"
 #include "../include/Shader.hpp"
+#include "../include/Renderer.hpp"
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -24,12 +26,17 @@ int main(int argc, char** argv) {
 
     try {
         Parser parser;
-        parser.parse(argv[1]);
         parser.checkExtension(argv[1]);
+
+        std::string modeStr(argv[1]);
+        parser.setMode(modeStr);
+        parser.parse(argv[1]);
         
         Mesh mesh(&parser);
         Shader shader("resources/shaders/Basic.shader");
-        App app(&mesh, &shader);
+        Renderer renderer;
+
+        App app(&mesh, &shader, &renderer, parser.getMode());
 
         app.run();
 

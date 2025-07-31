@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 15:29:45 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 12:09:50 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,11 @@
 #include <functional>
 #include <iostream>
 #include <glm/glm.hpp>
+
+enum Type {
+  OBJ,
+  FDF,
+};
 
 struct Vertex {
 	glm::vec3 position;
@@ -61,11 +66,20 @@ class Parser {
 
 		const std::vector<Vertex> &getVertices() const;
 		const std::vector<unsigned int> &getIndices() const;
+		int getMode() const;
+
+		void setMode(std::string &filePath);
 
 		void checkExtension(const std::string &filePath) const;
 		void parse(const std::string &filePath);
+		void parseOBJ(const std::string &filePath);
+		void parseFDF(const std::string &filePath);
+		void countFDFPositions(const std::string &filePath);
+		void calculateFDFSpacing();
 
 	private:
+		int _mode;
+	
 		//Raw storage
 		std::vector<glm::vec3> _positions;
 		std::vector<glm::vec2> _texCoords;
@@ -77,4 +91,8 @@ class Parser {
 
 		//Lookup map
 		std::unordered_map<FaceKey, unsigned int> _faceMap;
+
+		//FDF stuff
+		size_t _cols, _rows;
+		int _xSpacing, _ySpacing, _zSpacing;
 };

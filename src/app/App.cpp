@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 18:49:58 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/07/31 10:49:53 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 
 
-App::App(Mesh *mesh, Shader *shader) : _mesh(mesh), _shader(shader), window(nullptr) {
+App::App(Mesh *mesh, Shader *shader, Renderer *renderer, int mode) : _mesh(mesh), _shader(shader), _renderer(renderer), _mode(mode), window(nullptr) {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW\n";
 		return;
@@ -77,11 +77,7 @@ void App::run() {
 	_shader->compile();
 
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glBindVertexArray(_mesh->getVAO());
-        glDrawElements(GL_TRIANGLES, (GLsizei)_mesh->getIndexCount(), GL_UNSIGNED_INT, nullptr);
+        _renderer->draw(*_mesh, _mode);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
