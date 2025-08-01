@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 12:11:54 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 16:37:47 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,28 +31,28 @@ class Shader;
 class Renderer;
 
 class App {
-private:
-	int _mode;
-    Parser *_parser;
-	Mesh *_mesh;
-    Shader *_shader;
-    Renderer *_renderer;
-    GLFWwindow *_window;
-	std::unique_ptr<InputManager> _inputManager;
-    
-    bool _useOrthographic = false;
-    bool _wireframeMode = true;
+    private:
+        int _mode;
+        Parser *_parser;
+        Mesh *_mesh;
+        Shader *_shader;
+        Renderer *_renderer;
+        GLFWwindow *_window;
+        std::unique_ptr<InputManager> _inputManager;
+        
+        bool _useOrthographic = false;
+        bool _wireframeMode = false;
 
-public:
-    App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser);
-    ~App();
-    
-    void run();
+    public:
+        App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser);
+        ~App();
+        
+        void run();
 
-    void handleProjectionToggle(bool useOrthographic);
-    void handleWireframeToggle(bool wireframeMode);
+        void handleProjectionToggle(bool useOrthographic);
+        void handleWireframeToggle(bool wireframeMode);
 
-    glm::mat4 createProjectionMatrix();
-};
+        glm::mat4 createProjectionMatrix();
+    };
 
 #endif

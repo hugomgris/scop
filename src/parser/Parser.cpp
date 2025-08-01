@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 18:05:25 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 17:38:43 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,8 +200,8 @@ void Parser::parseFDF(const std::string &filePath) {
             glm::vec3 position;
             // Center the map around origin
             position.x = (j - (_cols - 1) / 2.0f) * _xSpacing;
-            position.y = ((_rows - 1) / 2.0f - i) * _ySpacing;
-            position.z = mapLayout[i][j] * _zSpacing;
+            position.y = mapLayout[i][j] * _ySpacing;
+            position.z = (i - (_rows - 1) / 2.0f) * _zSpacing;
             _positions.push_back(position);
 
             Vertex vertexData;
@@ -274,18 +274,18 @@ void Parser::calculateFDFSpacing() {
     }
     
     _xSpacing = BASE_SPACING * scaleFactor;
-    _ySpacing = BASE_SPACING * scaleFactor;
-    _zSpacing = BASE_SPACING * scaleFactor * 0.1f;
+    _ySpacing = BASE_SPACING * scaleFactor * 0.1f;
+    _zSpacing = BASE_SPACING * scaleFactor;
     
     const float MIN_SPACING = 0.1f;
     _xSpacing = std::max(_xSpacing, MIN_SPACING);
-    _ySpacing = std::max(_ySpacing, MIN_SPACING);
-    _zSpacing = std::max(_zSpacing, MIN_SPACING * 0.1f);
+    _ySpacing = std::max(_ySpacing, MIN_SPACING * 0.1f);
+    _zSpacing = std::max(_zSpacing, MIN_SPACING);
     
     if (maxDimension > 500) {
         float largeMapMultiplier = 5.0f;
         _xSpacing *= largeMapMultiplier;
-        _ySpacing *= largeMapMultiplier;
+        _zSpacing *= largeMapMultiplier;
     }
 }
 

@@ -6,19 +6,17 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 16:25:18 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 18:16:48 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Renderer.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 Renderer::Renderer(Shader* shader) : _shader(shader) {}
 
 void Renderer::setMatrices(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection) {
     _shader->use();
     
-    // Get uniform locations and set matrices
     int modelLoc = glGetUniformLocation(_shader->getID(), "model");
     int viewLoc = glGetUniformLocation(_shader->getID(), "view");
     int projectionLoc = glGetUniformLocation(_shader->getID(), "projection");
@@ -31,10 +29,22 @@ void Renderer::setMatrices(const glm::mat4& model, const glm::mat4& view, const 
 void Renderer::draw(Mesh &mesh, int mode) {
     int renderMode = mode == 0 ? GL_TRIANGLES : GL_LINES;
 
-    glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear depth buffer too
+    setClearColor(Colors::BLACK_CHARCOAL_1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _shader->use();
+    
+    int lineColorLoc = glGetUniformLocation(_shader->getID(), "lineColor");
+    int isLineModeLoc = glGetUniformLocation(_shader->getID(), "isLineMode");
+    
+    if (renderMode == GL_LINES) {
+        setLineColor(lineColorLoc, Colors::OFF_WHITE);
+        glLineWidth(2.0f);
+        glUniform1i(isLineModeLoc, 1);
+    } else {
+        glUniform1i(isLineModeLoc, 0);
+    }
+    
     glBindVertexArray(mesh.getVAO());
     glDrawElements(renderMode, (GLsizei)mesh.getIndexCount(), GL_UNSIGNED_INT, nullptr);
 }

@@ -6,29 +6,41 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 12:09:14 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 16:40:16 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef INPUTMANAGER_HPP
 # define INPUTMANAGER_HPP
 
+# include <iostream>
 # include <vector>
 # include <functional>
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
+# include "./Types.hpp"
 # include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+# include "glm/gtc/matrix_transform.hpp"
+# include "glm/gtc/type_ptr.hpp"
 
 class InputManager {
 	private:
 		GLFWwindow *_window;
+		int _mode;
 	
 		// Camera system
 		glm::vec3 _cameraPos;
 		glm::vec3 _cameraFront;
 		glm::vec3 _cameraUp;
+
+		float _movementSpeed = 10.f;
+		float _rotationSpeed = 90.0f;
+
+		float _modelRotationX = 0.0f;
+    	float _modelRotationY = 0.0f;
+
+		bool _autoRotation = false;
+		float _autoRotationSpeed = 45.0f;
 
 		//Matrices
 		glm::mat4 _model;
@@ -37,7 +49,7 @@ class InputManager {
 		
 		// Mouse input
 		float _lastX, _lastY;
-		float _yaw, _pitch;
+		float _yaw, _pitch, _roll = 0.f;
 		bool _firstMouse;
 		
 		// Timing
@@ -51,14 +63,15 @@ class InputManager {
 		std::function<void(bool)> _onWireframeToggle;
 		
 		bool _useOrthographic = false;
-		bool _wireframeMode = true;
+		bool _wireframeMode = false;
 	
 	public:
-		InputManager(GLFWwindow *window);
+		InputManager(GLFWwindow *window, int mode);
 		~InputManager();
 
 		float getDeltaTime() const;
 		float getLastFrame() const;
+		bool getAutorotationStatus() const;
 		std::vector<glm::mat4> getMatrices() const;
 		
 		void setDeltaTime(float currentFrame);
@@ -67,6 +80,10 @@ class InputManager {
 		void createMatrices();
 		glm::mat4 createOrthographicProjection(float aspectRatio, float zoom = 1.0f);
 		glm::mat4 createOrthographicProjectionForFDF(float aspectRatio, int mapRows, int mapCols, float spacing);
+		void updateCameraFront();
+		void updateCameraVectors();
+		void autoRotate();
+		void resetView();
 
 		// Static callbacks
 		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

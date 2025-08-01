@@ -6,21 +6,22 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 18:04:20 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 16:39:56 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#include <vector>
-#include <unordered_map>
-#include <functional>
-#include <iostream>
-#include <glm/glm.hpp>
 
-enum Type {
-  OBJ,
-  FDF,
-};
+#ifndef PARSER_HPP
+# define PARSER_HPP
+
+# include <vector>
+# include <unordered_map>
+# include <functional>
+# include <iostream>
+# include <glm/glm.hpp>
+
+# include "./Types.hpp"
 
 struct Vertex {
 	glm::vec3 position;
@@ -98,3 +99,5 @@ class Parser {
 		size_t _cols, _rows;
 		float _xSpacing, _ySpacing, _zSpacing;
 };
+
+#endif

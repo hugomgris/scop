@@ -6,14 +6,14 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 12:48:35 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 18:20:35 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/App.hpp"
 
 App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser)
-    : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), _window(nullptr) {
+    : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), _window(nullptr), _wireframeMode(false) {
         
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW\n";
@@ -45,7 +45,7 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
 	
 	glEnable(GL_DEPTH_TEST);
 
-	_inputManager = std::make_unique<InputManager>(_window);
+	_inputManager = std::make_unique<InputManager>(_window, _mode);
 
 	_inputManager->setProjectionToggleCallback([this](bool useOrtho) {
         this->handleProjectionToggle(useOrtho);
@@ -69,8 +69,6 @@ void App::run() {
 
     _mesh->bind();
     _shader->compile();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(_window)) {
         float currentFrame = glfwGetTime();
@@ -99,6 +97,13 @@ void App::handleProjectionToggle(bool useOrthographic) {
 
 void App::handleWireframeToggle(bool wireframeMode) {
     _wireframeMode = wireframeMode;
+    
+    if (wireframeMode) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+    
     std::cout << "Wireframe mode " << (wireframeMode ? "ON" : "OFF") << std::endl;
 }
 
