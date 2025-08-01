@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 18:14:37 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 12:48:59 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,14 @@ std::vector<glm::mat4> InputManager::getMatrices() const {
 void InputManager::setDeltaTime(float currentFrame) {
 	_deltaTime = currentFrame - _lastFrame;
 	_lastFrame = currentFrame;
+}
+
+void InputManager::setProjectionToggleCallback(std::function<void(bool)> callback) {
+    _onProjectionToggle = callback;
+}
+
+void InputManager::setWireframeToggleCallback(std::function<void(bool)> callback) {
+    _onWireframeToggle = callback;
 }
 
 void InputManager::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -117,28 +125,26 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
     }
     
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-        static bool wireframe = true;
-        wireframe = !wireframe;
-        if (wireframe) {
+        _wireframeMode = !_wireframeMode;
+        
+        if (_wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+        
+        if (_onWireframeToggle) {
+            _onWireframeToggle(_wireframeMode);
+        }
     }
 
-	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-		bool useOrthographic = true;
-
-		glm::mat4 projection;
-		float aspectRatio = (float)1920 / (float)1080;
-		if (useOrthographic) {
-			projection = createOrthographicProjection(aspectRatio);
-		} else {
-			projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-		}
-
-		/* setMatrices(_model, _view, projection);// THIS FUNCTION IS IN RENDERER SO WE'LL SEE HOW TO REACH IT */
-	}
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        _useOrthographic = !_useOrthographic;
+        
+        if (_onProjectionToggle) {
+            _onProjectionToggle(_useOrthographic);
+        }
+    }
 }
 
 void InputManager::processInput() {
@@ -157,7 +163,6 @@ void InputManager::processInput() {
 void InputManager::createMatrices() {
 	glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = glm::lookAt(_cameraPos, _cameraPos + _cameraFront, _cameraUp);
-    //glm::mat4 projection = glm::ortho(-10.f/2.0f, 10.f/2.0f, -10.f/2.0f, 10.f/2.0f, 0.1f, 100.0f);
 	glm::mat4 projection = glm::perspective(glm::radians(_fov), 1920.0f / 1080.0f, 0.1f, 1000.0f);
 
 	_model = model;

@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/31 18:12:25 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 12:09:14 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define INPUTMANAGER_HPP
 
 # include <vector>
+# include <functional>
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
 # include "glm/glm.hpp"
@@ -45,6 +46,12 @@ class InputManager {
 		
 		// Field of view
 		float _fov = 45.0f;
+
+		std::function<void(bool)> _onProjectionToggle;
+		std::function<void(bool)> _onWireframeToggle;
+		
+		bool _useOrthographic = false;
+		bool _wireframeMode = true;
 	
 	public:
 		InputManager(GLFWwindow *window);
@@ -71,6 +78,14 @@ class InputManager {
 		void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 		void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 		void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+		// Event callback setters
+		void setProjectionToggleCallback(std::function<void(bool)> callback);
+		void setWireframeToggleCallback(std::function<void(bool)> callback);
+		
+		// Getters for current state
+		bool isUsingOrthographic() const { return _useOrthographic; }
+		bool isWireframeMode() const { return _wireframeMode; }
 };
 
 #endif
