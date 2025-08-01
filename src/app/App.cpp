@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 18:20:35 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/01 18:26:17 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	_window = glfwCreateWindow(1920, 1080, "SCOP aka FDF3D aka the renderer of worlds", nullptr, nullptr);
+	_window = glfwCreateWindow(1920, 1080, "SCOP aka FDFGL aka the renderer of worlds", nullptr, nullptr);
 
 	if (!_window) {
 		std::cerr << "Failed to create GLFW window\n";
