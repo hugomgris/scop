@@ -6,14 +6,15 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 18:26:17 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:17:27 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/App.hpp"
 
 App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser)
-    : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), _window(nullptr), _wireframeMode(false) {
+    : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), 
+      _window(nullptr), _wireframeMode(false), _showVertices(false) {
         
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW\n";
@@ -54,6 +55,10 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     _inputManager->setWireframeToggleCallback([this](bool wireframeMode) {
         this->handleWireframeToggle(wireframeMode);
     });
+    
+    _inputManager->setVertexToggleCallback([this](bool showVertices) {
+        this->handleVertexToggle(showVertices);
+    });
 }
 
 App::~App() {
@@ -82,7 +87,7 @@ void App::run() {
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
         _renderer->setMatrices(matrices[0], matrices[1], projection);
-        _renderer->draw(*_mesh, _mode);
+        _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
@@ -105,6 +110,11 @@ void App::handleWireframeToggle(bool wireframeMode) {
     }
     
     std::cout << "Wireframe mode " << (wireframeMode ? "ON" : "OFF") << std::endl;
+}
+
+void App::handleVertexToggle(bool showVertices) {
+    _showVertices = showVertices;
+    std::cout << "Vertex visualization " << (showVertices ? "ON" : "OFF") << std::endl;
 }
 
 glm::mat4 App::createProjectionMatrix() {

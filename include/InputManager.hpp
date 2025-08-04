@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 16:40:16 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:17:21 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,11 @@ class InputManager {
 
 		std::function<void(bool)> _onProjectionToggle;
 		std::function<void(bool)> _onWireframeToggle;
+		std::function<void(bool)> _onVertexToggle;
 		
 		bool _useOrthographic = false;
 		bool _wireframeMode = false;
+		bool _showVertices = false;
 	
 	public:
 		InputManager(GLFWwindow *window, int mode);
@@ -71,6 +73,7 @@ class InputManager {
 
 		float getDeltaTime() const;
 		float getLastFrame() const;
+		glm::vec3 getCameraPosition() const;
 		bool getAutorotationStatus() const;
 		std::vector<glm::mat4> getMatrices() const;
 		
@@ -103,6 +106,7 @@ class InputManager {
 		// Getters for current state
 		bool isUsingOrthographic() const { return _useOrthographic; }
 		bool isWireframeMode() const { return _wireframeMode; }
+		void setVertexToggleCallback(std::function<void(bool)> callback);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 10:29:49 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:23:21 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,10 @@ float InputManager::getDeltaTime() const {
 
 float InputManager::getLastFrame() const {
 	return _lastFrame;
+}
+
+glm::vec3 InputManager::getCameraPosition() const {
+    return _cameraPos;
 }
 
 std::vector<glm::mat4> InputManager::getMatrices() const {
@@ -165,6 +169,22 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
         resetView();
     }
+
+    if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+        _showVertices = !_showVertices;
+        
+        if (_onVertexToggle) {
+            _onVertexToggle(_showVertices);
+        }
+    }
+
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        resetView();
+    }
+}
+
+void InputManager::setVertexToggleCallback(std::function<void(bool)> callback) {
+    _onVertexToggle = callback;
 }
 
 void InputManager::updateCameraVectors() {

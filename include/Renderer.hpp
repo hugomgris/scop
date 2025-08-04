@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 09:43:43 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:14:49 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "glm/glm.hpp"
 # include "Mesh.hpp"
 # include "Shader.hpp"
+# include "ErrorManager.hpp"
 # include "glm/gtc/type_ptr.hpp"
 
 class Renderer {
@@ -29,7 +30,7 @@ public:
     Renderer(Shader* shader);
     
     void setMatrices(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
-    void draw(Mesh &mesh, int mode);
+    void draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices = false);
 };
 
 #endif

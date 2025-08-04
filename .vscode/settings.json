@@ -69,6 +69,7 @@
 		"valarray": "cpp",
 		"variant": "cpp",
 		"codecvt": "cpp",
-		"semaphore": "cpp"
+		"semaphore": "cpp",
+		"filesystem": "cpp"
 	}
 }

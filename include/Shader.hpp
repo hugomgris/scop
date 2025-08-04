@@ -6,16 +6,20 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:18 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 18:49:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 10:50:16 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#include <string>
-#include <glad/glad.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+
+#ifndef SHADER_HPP
+# define SHADER_HPP
+# include <string>
+# include <glad/glad.h>
+# include <iostream>
+# include <fstream>
+# include <sstream>
+# include "ErrorManager.hpp"
 
 struct ShaderProgramSource {
 	std::string vertexSource;
@@ -42,3 +46,5 @@ class Shader {
         unsigned int compileShader(unsigned int type, const std::string &source);
         ShaderProgramSource parseShader(const std::string &filepath);
 };
+
+#endif

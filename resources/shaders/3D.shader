@@ -8,10 +8,11 @@ layout (location = 2) in vec3 aNormal;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform bool u_isVertexMode;
 
 out vec3 FragPos;
-out vec2 TexCoord;
 out vec3 Normal;
+out vec2 TexCoord;
 
 void main()
 {
@@ -20,45 +21,55 @@ void main()
     TexCoord = aTexCoord;
     
     gl_Position = projection * view * vec4(FragPos, 1.0);
+    
+    // Set point size for vertex visualization
+    if (u_isVertexMode) {
+        gl_PointSize = 8.0;
+    }
 }
 
 #shader fragment
 #version 330 core
 
 in vec3 FragPos;
-in vec2 TexCoord;
 in vec3 Normal;
+in vec2 TexCoord;
+
+uniform vec3 u_color;
+uniform vec3 u_lightPos;
+uniform vec3 u_lightColor;
+uniform vec3 u_viewPos;
+uniform vec3 u_lineColor;
+uniform vec3 u_vertexColor;
+uniform bool u_isLineMode;
+uniform bool u_isVertexMode;
 
 out vec4 FragColor;
 
-uniform vec3 lightPos;
-uniform vec3 lightColor;
-uniform vec3 viewPos;
-uniform vec3 lineColor;
-uniform bool isLineMode;
-
 void main()
 {
-    if (isLineMode) {
-        FragColor = vec4(lineColor, 1.0);
-    } else {
-        vec3 color = vec3(0.6, 0.8, 1.0);
-        
-        float ambientStrength = 0.3;
-        vec3 ambient = ambientStrength * lightColor;
-
-        vec3 norm = normalize(Normal);
-        vec3 lightDir = normalize(lightPos - FragPos);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = diff * lightColor;
-
-        float specularStrength = 0.5;
-        vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 reflectDir = reflect(-lightDir, norm);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        vec3 specular = specularStrength * spec * lightColor;
-        
-        vec3 result = (ambient + diffuse + specular) * color;
-        FragColor = vec4(result, 1.0);
+    if (u_isVertexMode) {
+        FragColor = vec4(u_vertexColor, 1.0);
+        return;
     }
+    
+    if (u_isLineMode) {
+        FragColor = vec4(u_lineColor, 1.0);
+        return;
+    }
+    
+    vec3 ambient = 0.1 * u_lightColor;
+    
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(u_lightPos - FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * u_lightColor;
+    
+    vec3 viewDir = normalize(u_viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = spec * u_lightColor;
+    
+    vec3 result = (ambient + diffuse + specular) * u_color;
+    FragColor = vec4(result, 1.0);
 }

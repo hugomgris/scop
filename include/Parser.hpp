@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 16:39:56 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 13:57:09 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ class Parser {
 		void parseFDF(const std::string &filePath);
 		void countFDFPositions(const std::string &filePath);
 		void calculateFDFSpacing();
+		void calculateNormals();
 
 	private:
 		int _mode;

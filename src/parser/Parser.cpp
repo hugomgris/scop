@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 17:38:43 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:04:22 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ void Parser::parseOBJ(const std::string &filePath) {
     }
 
     std::string line;
+    bool hasNormals = false;
+    
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
 
@@ -98,6 +100,7 @@ void Parser::parseOBJ(const std::string &filePath) {
             iss >> textCoord.x >> textCoord.y;
             _texCoords.push_back(textCoord);
         } else if (type == "vn") {
+            hasNormals = true;
             glm::vec3 normal;
             iss >> normal.x >> normal.y >> normal.z;
             _normals.push_back(normal);
@@ -117,15 +120,12 @@ void Parser::parseOBJ(const std::string &filePath) {
                     int posIndex = -1, texIndex = -1, normIndex = -1;
                     size_t firstSlash = v.find('/');
                     if (firstSlash == std::string::npos) {
-                        // just "v" case
                         posIndex = std::stoi(v) - 1;
                     } else {
-                        //manage different cases: v/vt, v//vn, v/vt/vn
                         posIndex = std::stoi(v.substr(0, firstSlash)) - 1;
                         size_t secondSlash = v.find('/', firstSlash + 1);
 
                         if (secondSlash == std::string::npos) {
-                            //means that there's no second slash, so v/vt case
                             std::string texStr = v.substr(firstSlash + 1);
                             if (!texStr.empty()) {
                                 texIndex = std::stoi(texStr) - 1;
@@ -143,11 +143,8 @@ void Parser::parseOBJ(const std::string &filePath) {
                         }
                     }
 
-                    //Check if key is already registered to avoid dups
                     FaceKey key{ posIndex, texIndex, normIndex };
                     if (_faceMap.find(key) == _faceMap.end()) {
-                        //means key is not in map
-                        //fill missing data with 0
                         Vertex vertexData;
                         vertexData.position = (posIndex >= 0 && posIndex < (int)_positions.size()) ? _positions[posIndex] : glm::vec3(0.f);
                         vertexData.texCoord = (texIndex >= 0 && texIndex < (int)_texCoords.size()) ? _texCoords[texIndex] : glm::vec2(0.f);
@@ -159,6 +156,11 @@ void Parser::parseOBJ(const std::string &filePath) {
                 }
             }
         }
+    }
+    
+    if (!hasNormals) {
+        std::cout << "No normals found in OBJ file. Calculating normals..." << std::endl;
+        calculateNormals();
     }
 }
 
@@ -181,7 +183,6 @@ void Parser::parseFDF(const std::string &filePath) {
         std::vector<int> mapLine;
 
         while (iss >> vertexStr) {
-            // Handle hex colors if present (format: value,0xcolor)
             size_t commaPos = vertexStr.find(',');
             if (commaPos != std::string::npos) {
                 vertexStr = vertexStr.substr(0, commaPos);
@@ -194,11 +195,9 @@ void Parser::parseFDF(const std::string &filePath) {
         }
     }
 
-    // Generate vertices from the 2D grid
     for (size_t i = 0; i < mapLayout.size(); i++) {
         for (size_t j = 0; j < mapLayout[i].size(); j++) {
             glm::vec3 position;
-            // Center the map around origin
             position.x = (j - (_cols - 1) / 2.0f) * _xSpacing;
             position.y = mapLayout[i][j] * _ySpacing;
             position.z = (i - (_rows - 1) / 2.0f) * _zSpacing;
@@ -207,12 +206,11 @@ void Parser::parseFDF(const std::string &filePath) {
             Vertex vertexData;
             vertexData.position = position;
             vertexData.texCoord = glm::vec2(0.f);
-            vertexData.normal = glm::vec3(0.f, 0.f, 1.f); // Default normal pointing up
+            vertexData.normal = glm::vec3(0.f, 0.f, 1.f);
             _vertices.push_back(vertexData);
         }
     }
 
-    // Generate line indices - connect each vertex to right and down neighbors
     for (size_t i = 0; i < _rows; i++) {
         for (size_t j = 0; j < _cols; j++) {
             size_t currentIndex = i * _cols + j;
@@ -295,4 +293,45 @@ const std::vector<Vertex> &Parser::getVertices() const {
 
 const std::vector<unsigned int> &Parser::getIndices() const {
 	return _indices;
+}
+
+void Parser::calculateNormals() {
+    std::vector<glm::vec3> vertexNormals(_vertices.size(), glm::vec3(0.0f));
+    std::vector<int> normalCounts(_vertices.size(), 0);
+    
+    for (size_t i = 0; i < _indices.size(); i += 3) {
+        if (i + 2 >= _indices.size()) break;
+        
+        unsigned int idx0 = _indices[i];
+        unsigned int idx1 = _indices[i + 1]; 
+        unsigned int idx2 = _indices[i + 2];
+        
+        if (idx0 >= _vertices.size() || idx1 >= _vertices.size() || idx2 >= _vertices.size()) {
+            continue;
+        }
+
+        glm::vec3 v0 = _vertices[idx0].position;
+        glm::vec3 v1 = _vertices[idx1].position;
+        glm::vec3 v2 = _vertices[idx2].position;
+
+        glm::vec3 edge1 = v1 - v0;
+        glm::vec3 edge2 = v2 - v0;
+        glm::vec3 faceNormal = glm::normalize(glm::cross(edge1, edge2));
+        
+        vertexNormals[idx0] += faceNormal;
+        vertexNormals[idx1] += faceNormal;
+        vertexNormals[idx2] += faceNormal;
+        
+        normalCounts[idx0]++;
+        normalCounts[idx1]++;
+        normalCounts[idx2]++;
+    }
+    
+    for (size_t i = 0; i < _vertices.size(); i++) {
+        if (normalCounts[i] > 0) {
+            _vertices[i].normal = glm::normalize(vertexNormals[i] / (float)normalCounts[i]);
+        } else {
+            _vertices[i].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+    }
 }

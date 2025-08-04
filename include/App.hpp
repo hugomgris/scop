@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 09:42:26 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:16:51 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,9 @@ class App {
         
         bool _useOrthographic = false;
         bool _wireframeMode = false;
+
+        bool _showVertices;
+        void handleVertexToggle(bool showVertices);
 
     public:
         App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser);

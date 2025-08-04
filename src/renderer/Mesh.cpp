@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:05 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/07/30 18:10:23 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 11:17:55 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ unsigned int Mesh::getIBO() const {
 }
 
 void Mesh::bind(){
-    glGenVertexArrays(1, &_VAO);
-    glBindVertexArray(_VAO);
+    GLCall(glGenVertexArrays(1, &_VAO));
+    GLCall(glBindVertexArray(_VAO));
 
     glGenBuffers(1, &_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
