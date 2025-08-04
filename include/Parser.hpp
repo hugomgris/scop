@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 13:57:09 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:00:39 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #ifndef PARSER_HPP
 # define PARSER_HPP
 
+# include <cmath>
+# include <algorithm>
+# include <limits>
 # include <vector>
 # include <unordered_map>
 # include <functional>
@@ -22,6 +25,30 @@
 # include <glm/glm.hpp>
 
 # include "./Types.hpp"
+
+struct BoundingBox {
+    glm::vec3 min;
+    glm::vec3 max;
+    
+    BoundingBox() : min(FLT_MAX), max(-FLT_MAX) {}
+    
+    glm::vec3 getCenter() const {
+        return (min + max) * 0.5f;
+    }
+    
+    glm::vec3 getSize() const {
+        return max - min;
+    }
+    
+    float getMaxDimension() const {
+        glm::vec3 size = getSize();
+        return std::max(std::max(size.x, size.y), size.z);
+    }
+    
+    float getDiagonal() const {
+        return glm::length(getSize());
+    }
+};
 
 struct Vertex {
 	glm::vec3 position;
@@ -80,9 +107,17 @@ class Parser {
 		void countFDFPositions(const std::string &filePath);
 		void calculateFDFSpacing();
 		void calculateNormals();
+		void updateMinMaxZ(float newZ);
+		float getZDifference() const;
+		const BoundingBox& getBoundingBox() const;
+		void updateBoundingBox(const glm::vec3& position);
+		float getOptimalCameraDistance() const;
 
 	private:
+		BoundingBox _boundingBox;
 		int _mode;
+		float _maxZ = std::numeric_limits<float>::min();
+		float _minZ = std::numeric_limits<float>::max();
 	
 		//Raw storage
 		std::vector<glm::vec3> _positions;

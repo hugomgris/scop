@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:17:21 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:12:43 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
 # include "./Types.hpp"
+# include "./Parser.hpp"
 # include "glm/glm.hpp"
 # include "glm/gtc/matrix_transform.hpp"
 # include "glm/gtc/type_ptr.hpp"
@@ -27,11 +28,14 @@ class InputManager {
 	private:
 		GLFWwindow *_window;
 		int _mode;
+		const BoundingBox &_boundingBox;
 	
 		// Camera system
 		glm::vec3 _cameraPos;
 		glm::vec3 _cameraFront;
 		glm::vec3 _cameraUp;
+		float _defaultDistance;
+		float _zoomLevel = 1.0f;
 
 		float _movementSpeed = 10.f;
 		float _rotationSpeed = 90.0f;
@@ -68,7 +72,7 @@ class InputManager {
 		bool _showVertices = false;
 	
 	public:
-		InputManager(GLFWwindow *window, int mode);
+		InputManager(GLFWwindow *window, int mode, float optimalDistance, const BoundingBox &boundingBox);
 		~InputManager();
 
 		float getDeltaTime() const;

@@ -6,24 +6,26 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:23:21 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:17:20 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/InputManager.hpp"
 
-InputManager::InputManager(GLFWwindow *window, int mode): _window(window), _mode(mode),
-	_cameraPos(0.0f, 0.0f, 5.0f), _cameraFront(0.0f, 0.0f, -1.0f), _cameraUp(0.0f, 1.0f, 0.0f),
-	_lastX(960.0f), _lastY(540.0f), _yaw(-90.0f), _pitch(0.0f), _firstMouse(true),
-	_deltaTime(0.0f), _lastFrame(0.0f) {
-	glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback_wrapper);
-	glfwSetScrollCallback(window, scroll_callback_wrapper);
-	glfwSetKeyCallback(window, key_callback_wrapper);
-	
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+InputManager::InputManager(GLFWwindow *window, int mode, float optimalDistance, const BoundingBox &boundingBox): _window(window), _mode(mode), _boundingBox(boundingBox),
+    _cameraPos(0.0f, 0.0f, optimalDistance), _cameraFront(0.0f, 0.0f, -1.0f), _cameraUp(0.0f, 1.0f, 0.0f),
+    _lastX(960.0f), _lastY(540.0f), _yaw(-90.0f), _pitch(0.0f), _firstMouse(true),
+    _deltaTime(0.0f), _lastFrame(0.0f) {
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback_wrapper);
+    glfwSetScrollCallback(window, scroll_callback_wrapper);
+    glfwSetKeyCallback(window, key_callback_wrapper);
+    
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     updateCameraVectors();
+    
+    _defaultDistance = optimalDistance;
 }
 
 InputManager::~InputManager() {}
@@ -125,9 +127,15 @@ void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yo
     (void)window;
     (void)xoffset;
     
-    _fov -= (float)yoffset;
-    if (_fov < 1.0f) _fov = 1.0f;
-    if (_fov > 45.0f) _fov = 45.0f;
+    if (_useOrthographic) {
+        _zoomLevel += (float)yoffset * 0.1f;
+        if (_zoomLevel < 0.1f) _zoomLevel = 0.1f;
+        if (_zoomLevel > 5.0f) _zoomLevel = 5.0f;
+    } else {
+        _fov -= (float)yoffset;
+        if (_fov < 1.0f) _fov = 1.0f;
+        if (_fov > 45.0f) _fov = 45.0f;
+    }
 }
 
 void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -244,9 +252,9 @@ void InputManager::createMatrices() {
     glm::mat4 projection;
     if (_useOrthographic) {
         if (_mode == FDF) {
-            projection = createOrthographicProjectionForFDF(1920.0f / 1080.0f, 110, 190, 10.f);
+            projection = createOrthographicProjectionForFDF(1920.0f / 1080.0f, 110, 190, 10.f * _zoomLevel);
         } else {
-            projection = createOrthographicProjection(1920.0f / 1080.0f, 1.0f);
+            projection = createOrthographicProjection(1920.0f / 1080.0f, _zoomLevel);
         }
     } else {
         projection = glm::perspective(glm::radians(_fov), 1920.0f / 1080.0f, 0.1f, 1000.0f);
@@ -258,7 +266,7 @@ void InputManager::createMatrices() {
 }
 
 glm::mat4 InputManager::createOrthographicProjection(float aspectRatio, float zoom) {
-    float orthoSize = 10.0f / zoom;
+    float orthoSize = _boundingBox.getDiagonal() / zoom;
     
     float left = -orthoSize * aspectRatio;
     float right = orthoSize * aspectRatio;
@@ -273,9 +281,8 @@ glm::mat4 InputManager::createOrthographicProjection(float aspectRatio, float zo
 glm::mat4 InputManager::createOrthographicProjectionForFDF(float aspectRatio, int mapRows, int mapCols, float spacing) {
     float mapWidth = mapCols * spacing;
     float mapHeight = mapRows * spacing;
-
-    // Use a zoom factor to control how close/far the view is
-    float zoomFactor = 0.5f;  // Smaller = closer view, larger = farther view
+    
+    float zoomFactor = 0.5f;
     
     float maxDimension = std::max(mapWidth, mapHeight);
     float orthoSize = (maxDimension * zoomFactor) / 2.0f;
@@ -295,7 +302,7 @@ void InputManager::updateCameraFront() {
 }
 
 void InputManager::resetView() {
-    _cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+    _cameraPos = glm::vec3(0.0f, 0.0f, _defaultDistance);
     _cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     _cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     _yaw = -90.0f;
@@ -304,6 +311,7 @@ void InputManager::resetView() {
     _modelRotationX = 0.0f;
     _modelRotationY = 0.0f;
     _fov = 45.0f;
+    _zoomLevel = 1.0f;
     updateCameraVectors();
     std::cout << "View reset to default" << std::endl;
 }

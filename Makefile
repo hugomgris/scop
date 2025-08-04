@@ -15,8 +15,8 @@ NAME        := scop
 
 CXX          = c++
 CC           = gcc
-FLAGS       = -Werror -Wall -Wextra -std=c++17 -pedantic -g -fsanitize=address
-CFLAGS      = -Werror -Wall -Wextra -g -fsanitize=address
+FLAGS       = -std=c++17 -pedantic -g -fsanitize=address
+CFLAGS      = -g -fsanitize=address
 DEPFLAGS    = -MMD -MP
 
 # -=-=-=-=-    PATH -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #

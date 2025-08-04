@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:04:22 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:00:58 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ void Parser::parseOBJ(const std::string &filePath) {
 
     std::string line;
     bool hasNormals = false;
+
+    _boundingBox = BoundingBox();
     
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
@@ -94,6 +96,8 @@ void Parser::parseOBJ(const std::string &filePath) {
         if (type == "v") {
             glm::vec3 position;
             iss >> position.x >> position.y >> position.z;
+            updateMinMaxZ(position.z);
+            updateBoundingBox(position);
             _positions.push_back(position);
         } else if (type == "vt") {
             glm::vec2 textCoord;
@@ -162,6 +166,10 @@ void Parser::parseOBJ(const std::string &filePath) {
         std::cout << "No normals found in OBJ file. Calculating normals..." << std::endl;
         calculateNormals();
     }
+
+    std::cout << "Bounding box: Min(" << _boundingBox.min.x << ", " << _boundingBox.min.y << ", " << _boundingBox.min.z << ")" << std::endl;
+    std::cout << "              Max(" << _boundingBox.max.x << ", " << _boundingBox.max.y << ", " << _boundingBox.max.z << ")" << std::endl;
+    std::cout << "Optimal camera distance: " << getOptimalCameraDistance() << std::endl;
 }
 
 void Parser::parseFDF(const std::string &filePath) {
@@ -172,6 +180,8 @@ void Parser::parseFDF(const std::string &filePath) {
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file. Check permissions.");
     }
+
+    _boundingBox = BoundingBox();
     
     std::vector<std::vector<int>> mapLayout;
     std::string line;
@@ -201,6 +211,7 @@ void Parser::parseFDF(const std::string &filePath) {
             position.x = (j - (_cols - 1) / 2.0f) * _xSpacing;
             position.y = mapLayout[i][j] * _ySpacing;
             position.z = (i - (_rows - 1) / 2.0f) * _zSpacing;
+            updateBoundingBox(position);
             _positions.push_back(position);
 
             Vertex vertexData;
@@ -226,6 +237,10 @@ void Parser::parseFDF(const std::string &filePath) {
             }
         }
     }
+
+    std::cout << "FDF Bounding box: Min(" << _boundingBox.min.x << ", " << _boundingBox.min.y << ", " << _boundingBox.min.z << ")" << std::endl;
+    std::cout << "                  Max(" << _boundingBox.max.x << ", " << _boundingBox.max.y << ", " << _boundingBox.max.z << ")" << std::endl;
+    std::cout << "Optimal camera distance: " << getOptimalCameraDistance() << std::endl;
 }
 
 void Parser::countFDFPositions(const std::string &filePath) {
@@ -334,4 +349,42 @@ void Parser::calculateNormals() {
             _vertices[i].normal = glm::vec3(0.0f, 1.0f, 0.0f);
         }
     }
+}
+
+void Parser::updateMinMaxZ(float newZ) {
+    if (newZ > _maxZ) {
+        _maxZ = newZ;
+    } else if (newZ < _minZ) {
+        _minZ = newZ;
+    }
+}
+
+float Parser::getZDifference() const {
+    return std::abs(_maxZ - _minZ);
+}
+
+void Parser::updateBoundingBox(const glm::vec3& position) {
+    _boundingBox.min.x = std::min(_boundingBox.min.x, position.x);
+    _boundingBox.min.y = std::min(_boundingBox.min.y, position.y);
+    _boundingBox.min.z = std::min(_boundingBox.min.z, position.z);
+    
+    _boundingBox.max.x = std::max(_boundingBox.max.x, position.x);
+    _boundingBox.max.y = std::max(_boundingBox.max.y, position.y);
+    _boundingBox.max.z = std::max(_boundingBox.max.z, position.z);
+}
+
+const BoundingBox &Parser::getBoundingBox() const {
+    return _boundingBox;
+}
+
+float Parser::getOptimalCameraDistance() const {
+    float diagonal = _boundingBox.getDiagonal();
+    float fovRadians = glm::radians(45.0f);
+    float distance = (diagonal * 0.5f) / tan(fovRadians * 0.5f);
+    
+    distance *= 1.2f;
+    
+    distance = std::max(distance, 2.0f);
+    
+    return distance;
 }

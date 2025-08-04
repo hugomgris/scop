@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:19:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:33:20 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showV
         int lightColorLoc = glGetUniformLocation(_shader->getID(), "u_lightColor");
         int viewPosLoc = glGetUniformLocation(_shader->getID(), "u_viewPos");
         
-        glUniform3f(colorLoc, 1.0, 0.0, 1.0);
+        glUniform3f(colorLoc, 0.5, 0.5, 0.9);
         
         glm::vec3 lightPos(5.0f, 5.0f, 5.0f);
         glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));

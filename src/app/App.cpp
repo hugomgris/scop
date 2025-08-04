@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:17:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:17:27 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,39 +16,40 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), 
       _window(nullptr), _wireframeMode(false), _showVertices(false) {
         
-	if (!glfwInit()) {
-		std::cerr << "Failed to initialize GLFW\n";
-		return;
-	}
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW\n";
+        return;
+    }
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	_window = glfwCreateWindow(1920, 1080, "SCOP aka FDFGL aka the renderer of worlds", nullptr, nullptr);
+    _window = glfwCreateWindow(1920, 1080, "SCOP aka FDFGL aka the renderer of worlds", nullptr, nullptr);
 
-	if (!_window) {
-		std::cerr << "Failed to create GLFW window\n";
-		glfwTerminate();
-		return;
-	}
+    if (!_window) {
+        std::cerr << "Failed to create GLFW window\n";
+        glfwTerminate();
+        return;
+    }
 
-	glfwMakeContextCurrent(_window);
+    glfwMakeContextCurrent(_window);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD\n";
-		glfwTerminate();
-		_window = nullptr;
-		return;
-	}
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD\n";
+        glfwTerminate();
+        _window = nullptr;
+        return;
+    }
 
-	glViewport(0, 0, 1920, 1080);
-	
-	glEnable(GL_DEPTH_TEST);
+    glViewport(0, 0, 1920, 1080);
+    glEnable(GL_DEPTH_TEST);
 
-	_inputManager = std::make_unique<InputManager>(_window, _mode);
+    float optimalDistance = _parser->getOptimalCameraDistance();
+    
+    _inputManager = std::make_unique<InputManager>(_window, _mode, optimalDistance, _parser->getBoundingBox());
 
-	_inputManager->setProjectionToggleCallback([this](bool useOrtho) {
+    _inputManager->setProjectionToggleCallback([this](bool useOrtho) {
         this->handleProjectionToggle(useOrtho);
     });
     
@@ -82,11 +83,9 @@ void App::run() {
         _inputManager->processInput();
         _inputManager->createMatrices();
         
-        glm::mat4 projection = createProjectionMatrix();
-        
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
-        _renderer->setMatrices(matrices[0], matrices[1], projection);
+        _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
         _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
 
         glfwSwapBuffers(_window);
@@ -122,7 +121,7 @@ glm::mat4 App::createProjectionMatrix() {
     
     if (_useOrthographic) {
         if (_mode == OBJ) {
-            return _inputManager->createOrthographicProjection(aspectRatio, 5.f);
+            return _inputManager->createOrthographicProjection(aspectRatio, 1.f);
         } else {
             return _inputManager->createOrthographicProjectionForFDF(aspectRatio, _parser->getRows(), _parser->getColumns(), 1.f);
         }
