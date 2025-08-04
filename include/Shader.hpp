@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:18 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 10:50:16 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 18:28:30 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,7 @@
 # include <fstream>
 # include <sstream>
 # include "ErrorManager.hpp"
-
-struct ShaderProgramSource {
-	std::string vertexSource;
-	std::string fragmentSource;
-};
+# include "Types.hpp"
 
 class Shader {
     public:

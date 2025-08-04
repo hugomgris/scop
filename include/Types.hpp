@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:38:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 17:51:34 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 18:28:04 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,79 @@
 #ifndef TYPES_HPP
 # define TYPES_HPP
 
+# include "glm/glm.hpp"
+# include "glm/gtc/matrix_transform.hpp"
+# include "glm/gtc/type_ptr.hpp"
+
 enum Type {
   OBJ,
   FDF,
+};
+
+struct BoundingBox {
+    glm::vec3 min;
+    glm::vec3 max;
+    
+    BoundingBox() : min(FLT_MAX), max(-FLT_MAX) {}
+    
+    glm::vec3 getCenter() const {
+        return (min + max) * 0.5f;
+    }
+    
+    glm::vec3 getSize() const {
+        return max - min;
+    }
+    
+    float getMaxDimension() const {
+        glm::vec3 size = getSize();
+        return std::max(std::max(size.x, size.y), size.z);
+    }
+    
+    float getDiagonal() const {
+        return glm::length(getSize());
+    }
+};
+
+struct Vertex {
+	glm::vec3 position;
+	glm::vec2 texCoord;
+	glm::vec3 normal;
+
+	bool operator==(const Vertex& other) const {
+		return position == other.position &&
+		       texCoord == other.texCoord &&
+		       normal == other.normal;
+	}
+};
+
+struct FaceKey {
+	int posIndex;
+	int texIndex;
+	int normIndex;
+
+	bool operator==(const FaceKey& other) const {
+		return posIndex == other.posIndex &&
+		       texIndex == other.texIndex &&
+		       normIndex == other.normIndex;
+	}
+};
+
+namespace std {
+	template <>
+	struct hash<FaceKey> {
+		std::size_t operator()(const FaceKey& key) const {
+			std::size_t h1 = std::hash<int>()(key.posIndex);
+			std::size_t h2 = std::hash<int>()(key.texIndex);
+			std::size_t h3 = std::hash<int>()(key.normIndex);
+
+			return h1 ^ (h2 << 1) ^ (h3 << 2);
+		}
+	};
+}
+
+struct ShaderProgramSource {
+	std::string vertexSource;
+	std::string fragmentSource;
 };
 
 #endif
