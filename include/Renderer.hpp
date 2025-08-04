@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/01 17:58:23 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/04 09:43:43 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define RENDERER_HPP
 
 # include <glad/glad.h>
-
+# include "./ErrorManager.hpp"
 # include "./Colors.hpp"
 # include "glm/glm.hpp"
 # include "Mesh.hpp"

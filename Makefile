@@ -53,6 +53,7 @@ SRC         := src/main.cpp \
 			   src/renderer/Renderer.cpp \
 			   src/renderer/Shader.cpp \
 			   src/renderer/Mesh.cpp \
+			   src/utils/ErrorManager.cpp \
 
 # Convert .c files to .o for glad
 GLAD_OBJ    = $(addprefix $(OBJ_DIR)/, $(GLAD_SRC:.c=.o))
