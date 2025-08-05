@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,11 @@
 # include "./Texture.hpp"
 # include "./TextureLoader.hpp"
 # include "./ErrorManager.hpp"
+# include "./Colors.hpp"
+# include <glad/glad.h>
 # include <memory>
 # include <iostream>
+# include <unordered_map>
 # include <sstream>
 # include <fstream>
 # include "glm/glm.hpp"
@@ -44,6 +47,7 @@ class App {
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<TextureLoader> _textureLoader;
         std::shared_ptr<Texture> _currentTexture;
+        std::unordered_map<int, std::shared_ptr<Texture>> _materialTextures;
         
         bool _useOrthographic = false;
         bool _wireframeMode = false;
@@ -59,6 +63,7 @@ class App {
 
         void handleProjectionToggle(bool useOrthographic);
         void handleWireframeToggle(bool wireframeMode);
+        void renderWithMaterials();
 
         glm::mat4 createProjectionMatrix();
     };

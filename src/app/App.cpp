@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,17 +74,16 @@ App::~App() {
 void App::run() {
     if (!_window) return;
 
-    // Try to load texture from MTL materials first
+    // Load all material textures
     const auto& materials = _parser->getMaterials();
     
     if (!materials.empty()) {
-        // Use the first material that has a texture
-        for (const auto& material : materials) {
-            _currentTexture = _textureLoader->loadMaterialTextures(material);
-            if (_currentTexture) {
-                std::cout << "Using texture from material: " << material.name << std::endl;
-                break;
-            }
+        _materialTextures = _textureLoader->loadAllMaterialTextures(materials);
+        
+        // If we have material textures, use the first one as current for single-texture rendering
+        if (!_materialTextures.empty()) {
+            _currentTexture = _materialTextures.begin()->second;
+            std::cout << "Using multi-material rendering with " << _materialTextures.size() << " textures" << std::endl;
         }
     }
     
@@ -115,13 +114,123 @@ void App::run() {
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
         _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
-        if (_currentTexture) {
-            _currentTexture->Bind(0);
+        
+        // Check if we have material groups for multi-material rendering
+        const auto& materialGroups = _parser->getMaterialGroups();
+        
+        if (!materialGroups.empty() && !_materialTextures.empty()) {
+            renderWithMaterials();
+        } else {
+            // Fallback to single texture rendering
+            if (_currentTexture) {
+                _currentTexture->Bind(0);
+            }
+            _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
         }
-        _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
+    }
+}
+
+void App::renderWithMaterials() {
+    const auto& materialGroups = _parser->getMaterialGroups();
+    
+    // Clear the screen once
+    setClearColor(Colors::BLACK_CHARCOAL_1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // Render each material group separately
+    for (const auto& group : materialGroups) {
+        if (group.indices.empty()) continue;
+        
+        // Find and bind the texture for this material
+        auto textureIt = _materialTextures.find(group.materialIndex);
+        if (textureIt != _materialTextures.end()) {
+            textureIt->second->Bind(0);
+        } else if (_currentTexture) {
+            _currentTexture->Bind(0);  // Fallback texture
+        }
+        
+        // Set shader uniforms for this material group
+        _shader->use();
+        int renderMode = _mode == 0 ? GL_TRIANGLES : GL_LINES;
+        
+        if (renderMode == GL_LINES) {
+            int lineColorLoc = glGetUniformLocation(_shader->getID(), "u_lineColor");
+            int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
+            int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
+            
+            setLineColor(lineColorLoc, Colors::OFF_WHITE);
+            glLineWidth(2.0f);
+            glUniform1i(isLineModeLoc, 1);
+            glUniform1i(isVertexModeLoc, 0);
+        } else {
+            int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
+            int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
+            glUniform1i(isLineModeLoc, 0);
+            glUniform1i(isVertexModeLoc, 0);
+            
+            // Set material properties
+            int colorLoc = glGetUniformLocation(_shader->getID(), "u_color");
+            int lightPosLoc = glGetUniformLocation(_shader->getID(), "u_lightPos");
+            int lightColorLoc = glGetUniformLocation(_shader->getID(), "u_lightColor");
+            int viewPosLoc = glGetUniformLocation(_shader->getID(), "u_viewPos");
+            int textureLoc = glGetUniformLocation(_shader->getID(), "u_texture");
+            int useTextureLoc = glGetUniformLocation(_shader->getID(), "useTexture");
+            
+            glUniform3f(colorLoc, 0.5, 0.5, 0.9);
+            
+            glm::vec3 lightPos(5.0f, 5.0f, 5.0f);
+            glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
+            
+            glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+            glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+            
+            glUniform3fv(viewPosLoc, 1, glm::value_ptr(_inputManager->getCameraPosition()));
+            
+            glUniform1i(textureLoc, 0);
+            glUniform1i(useTextureLoc, 1);
+        }
+        
+        // Create a temporary index buffer for this material group
+        unsigned int materialIBO;
+        glGenBuffers(1, &materialIBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, materialIBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+                     group.indices.size() * sizeof(unsigned int), 
+                     group.indices.data(), 
+                     GL_DYNAMIC_DRAW);
+        
+        // Bind VAO and draw this material group
+        GLCall(glBindVertexArray(_mesh->getVAO()));
+        GLCall(glDrawElements(renderMode, static_cast<GLsizei>(group.indices.size()), GL_UNSIGNED_INT, nullptr));
+        
+        // Clean up the temporary buffer
+        glDeleteBuffers(1, &materialIBO);
+        
+        // Restore the original IBO
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->getIBO());
+    }
+    
+    // Handle vertex visualization if enabled
+    if (_showVertices) {
+        _shader->use();
+        int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
+        int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
+        glUniform1i(isVertexModeLoc, 1);
+        glUniform1i(isLineModeLoc, 0);
+        
+        int vertexColorLoc = glGetUniformLocation(_shader->getID(), "u_vertexColor");
+        glUniform3f(vertexColorLoc, 1.0f, 1.0f, 0.0f);
+        
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glPointSize(10.0f);
+        
+        GLCall(glBindVertexArray(_mesh->getVAO()));
+        GLCall(glDrawArrays(GL_POINTS, 0, _mesh->getVertexCount()));
+        
+        glDisable(GL_PROGRAM_POINT_SIZE);
     }
 }
 

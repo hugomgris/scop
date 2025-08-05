@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 12:00:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,23 @@ std::shared_ptr<Texture> TextureLoader::loadMaterialTextures(const Material& mat
     // If no textures found, return nullptr (will use default color)
     std::cout << "No valid textures found for material: " << material.name << std::endl;
     return nullptr;
+}
+
+std::unordered_map<int, std::shared_ptr<Texture>> TextureLoader::loadAllMaterialTextures(const std::vector<Material>& materials) {
+    std::unordered_map<int, std::shared_ptr<Texture>> textureMap;
+    
+    for (size_t i = 0; i < materials.size(); ++i) {
+        auto texture = loadMaterialTextures(materials[i]);
+        if (texture) {
+            textureMap[static_cast<int>(i)] = texture;
+            std::cout << "Loaded texture for material " << i << ": " << materials[i].name << std::endl;
+        } else {
+            std::cout << "No texture found for material " << i << ": " << materials[i].name << std::endl;
+        }
+    }
+    
+    std::cout << "Loaded " << textureMap.size() << " textures from " << materials.size() << " materials" << std::endl;
+    return textureMap;
 }
 
 std::shared_ptr<Texture> TextureLoader::getTexture(const std::string& filePath) {

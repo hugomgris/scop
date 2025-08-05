@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,11 @@ void Parser::parseOBJ(const std::string &filePath) {
 
     _boundingBox = BoundingBox();
     
+    // Initialize material tracking
+    _currentMaterial = "";
+    _currentMaterialIndex = -1;
+    _materialGroups.clear();
+    
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
 
@@ -123,7 +128,27 @@ void Parser::parseOBJ(const std::string &filePath) {
         } else if (type == "usemtl") {
             std::string materialName;
             iss >> materialName;
-            // Material usage could be tracked here if needed for per-face materials
+            
+            _currentMaterial = materialName;
+            _currentMaterialIndex = getMaterialIndex(materialName);
+            
+            // Create a new material group if it doesn't exist
+            bool found = false;
+            for (auto& group : _materialGroups) {
+                if (group.materialName == materialName) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                MaterialGroup newGroup;
+                newGroup.materialName = materialName;
+                newGroup.materialIndex = _currentMaterialIndex;
+                _materialGroups.push_back(newGroup);
+                
+                std::cout << "Using material: " << materialName << " (index: " << _currentMaterialIndex << ")" << std::endl;
+            }
         } else if (type == "f") {
             std::string vertexStr;
             std::vector<std::string> faceVertices;
@@ -134,6 +159,8 @@ void Parser::parseOBJ(const std::string &filePath) {
 
             for (size_t i = 1; i + 1 < faceVertices.size(); ++i) {
                 std::string verts[3] = { faceVertices[0], faceVertices[i], faceVertices [i + 1] };
+                unsigned int triangleIndices[3];
+                
                 for (int j = 0; j < 3; ++j) {
                     const std::string &v = verts[j];
 
@@ -172,7 +199,20 @@ void Parser::parseOBJ(const std::string &filePath) {
                         _vertices.push_back(vertexData);
                         _faceMap[key] = (unsigned int)_vertices.size() - 1;
                     }
+                    triangleIndices[j] = _faceMap[key];
                     _indices.push_back(_faceMap[key]);
+                }
+                
+                // Add triangle indices to the current material group
+                if (_currentMaterialIndex >= 0 && !_materialGroups.empty()) {
+                    for (auto& group : _materialGroups) {
+                        if (group.materialName == _currentMaterial) {
+                            group.indices.push_back(triangleIndices[0]);
+                            group.indices.push_back(triangleIndices[1]);
+                            group.indices.push_back(triangleIndices[2]);
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -455,6 +495,19 @@ const Material* Parser::getMaterialByName(const std::string& name) const {
 		}
 	}
 	return nullptr;
+}
+
+const std::vector<MaterialGroup> &Parser::getMaterialGroups() const {
+	return _materialGroups;
+}
+
+int Parser::getMaterialIndex(const std::string& name) const {
+	for (size_t i = 0; i < _materials.size(); ++i) {
+		if (_materials[i].name == name) {
+			return static_cast<int>(i);
+		}
+	}
+	return -1;
 }
 
 void Parser::calculateNormals() {

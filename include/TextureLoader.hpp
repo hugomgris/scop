@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 12:00:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ public:
     
     // Load textures for a material, returns the diffuse texture or nullptr
     std::shared_ptr<Texture> loadMaterialTextures(const Material& material);
+    
+    // Load all materials' textures and return a map of material index to texture
+    std::unordered_map<int, std::shared_ptr<Texture>> loadAllMaterialTextures(const std::vector<Material>& materials);
     
     // Get a texture by file path (from cache)
     std::shared_ptr<Texture> getTexture(const std::string& filePath);

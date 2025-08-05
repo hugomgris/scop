@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:38:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 11:54:31 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,17 @@ struct Vertex {
 		       texCoord == other.texCoord &&
 		       normal == other.normal;
 	}
+};
+
+struct Face {
+    unsigned int indices[3];  // Triangle indices
+    int materialIndex;        // Index into materials array (-1 = no material)
+};
+
+struct MaterialGroup {
+    std::string materialName;
+    int materialIndex;
+    std::vector<unsigned int> indices;  // Indices for this material group
 };
 
 struct FaceKey {

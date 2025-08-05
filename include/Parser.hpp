@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ class Parser {
 		const std::vector<Vertex> &getVertices() const;
 		const std::vector<unsigned int> &getIndices() const;
 		const std::vector<Material> &getMaterials() const;
+		const std::vector<MaterialGroup> &getMaterialGroups() const;
 		const Material* getMaterialByName(const std::string& name) const;
+		int getMaterialIndex(const std::string& name) const;
 		size_t getRows() const;
 		size_t getColumns() const;
 		int getMode() const;
@@ -70,6 +72,11 @@ class Parser {
 		std::vector<Vertex> _vertices;
 		std::vector<unsigned int> _indices;
 		std::vector<Material> _materials;
+		std::vector<MaterialGroup> _materialGroups;
+
+		//Material tracking
+		std::string _currentMaterial;
+		int _currentMaterialIndex;
 
 		//Lookup map
 		std::unordered_map<FaceKey, unsigned int> _faceMap;
