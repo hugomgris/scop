@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:33:20 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 10:55:37 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,10 @@ void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showV
         int lightColorLoc = glGetUniformLocation(_shader->getID(), "u_lightColor");
         int viewPosLoc = glGetUniformLocation(_shader->getID(), "u_viewPos");
         
+        // Add texture uniforms here
+        int textureLoc = glGetUniformLocation(_shader->getID(), "u_texture");
+        int useTextureLoc = glGetUniformLocation(_shader->getID(), "useTexture");
+        
         glUniform3f(colorLoc, 0.5, 0.5, 0.9);
         
         glm::vec3 lightPos(5.0f, 5.0f, 5.0f);
@@ -61,6 +65,10 @@ void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showV
         glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
         
         glUniform3fv(viewPosLoc, 1, glm::value_ptr(cameraPos));
+        
+        // Set texture uniforms
+        glUniform1i(textureLoc, 0);  // Use texture unit 0
+        glUniform1i(useTextureLoc, 1);  // Enable texture usage (0 = no texture, toggleable)
     }
     
     GLCall(glBindVertexArray(mesh.getVAO()));

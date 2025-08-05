@@ -43,11 +43,15 @@ uniform vec3 u_lineColor;
 uniform vec3 u_vertexColor;
 uniform bool u_isLineMode;
 uniform bool u_isVertexMode;
+uniform bool useTexture;
+uniform sampler2D u_texture;
 
 out vec4 FragColor;
 
 void main()
 {
+    vec4 texColor = texture(u_texture, TexCoord);
+    
     if (u_isVertexMode) {
         FragColor = vec4(u_vertexColor, 1.0);
         return;
@@ -59,6 +63,11 @@ void main()
     }
     
     vec3 ambient = 0.1 * u_lightColor;
+
+    vec3 baseColor;
+    if (useTexture) {
+        baseColor = texColor.rgb;
+    }
     
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(u_lightPos - FragPos);
@@ -71,6 +80,6 @@ void main()
     float specStrength = 0.2f;
     vec3 specular = spec * u_lightColor * specStrength;
     
-    vec3 result = (ambient + diffuse + specular) * u_color;
+    vec3 result = (ambient + diffuse + specular) * (useTexture ? baseColor : u_color);
     FragColor = vec4(result, 1.0);
 }

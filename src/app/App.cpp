@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 17:17:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 10:51:10 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,14 @@ App::~App() {
 void App::run() {
     if (!_window) return;
 
+    Texture texture("resources/textures/Material.png");
+    texture.Bind();
+
     _mesh->bind();
+
     _shader->compile();
+    _shader->use();
+    _shader->setUniform("u_texture", 0);
 
     while (!glfwWindowShouldClose(_window)) {
         float currentFrame = glfwGetTime();
@@ -86,6 +92,7 @@ void App::run() {
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
         _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
+        texture.Bind(0);
         _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
 
         glfwSwapBuffers(_window);

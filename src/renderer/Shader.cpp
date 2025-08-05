@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 10:56:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 10:24:58 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,4 +104,20 @@ unsigned int Shader::createShader(const std::string &vertexShader, const std::st
 	glDeleteShader(_fs);
 
 	return (program);
+}
+
+void Shader::setUniform(const std::string& name, int value) {
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
+    }
+    glUniform1i(location, value);
+}
+
+void Shader::setUniform(const std::string& name, const glm::mat4& matrix) {
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
+    }
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }

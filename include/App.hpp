@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 14:16:51 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 10:13:53 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "./Mesh.hpp"
 # include "./Shader.hpp"
 # include "./InputManager.hpp"
+# include "./Texture.hpp"
 # include "./ErrorManager.hpp"
 # include <memory>
 # include <iostream>
