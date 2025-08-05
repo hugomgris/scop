@@ -1,0 +1,279 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   UIManager.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
+/*   Updated: 2025/08/05 16:52:27 by hmunoz-g         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../include/UIManager.hpp"
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
+UIManager::UIManager(GLFWwindow* window) : _window(window) {
+    int width, height;
+    glfwGetWindowSize(_window, &width, &height);
+    _layout.windowWidth = static_cast<float>(width);
+    _layout.windowHeight = static_cast<float>(height);
+    
+    _layout.renderAreaPos = ImVec2(_layout.leftPanelWidth + _layout.panelPadding, _layout.panelPadding);
+    _layout.renderAreaSize = ImVec2(
+        _layout.windowWidth - _layout.leftPanelWidth - (_layout.panelPadding * 2),
+        _layout.windowHeight - (_layout.panelPadding * 2)
+    );
+}
+
+UIManager::~UIManager() {
+    shutdown();
+}
+
+bool UIManager::initialize() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    
+    setupStyle();
+    
+    ImGui_ImplGlfw_InitForOpenGL(_window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+    
+    return true;
+}
+
+void UIManager::shutdown() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void UIManager::setupStyle() {
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    // Colors
+    style.Colors[ImGuiCol_WindowBg] = _panelColor;
+    style.Colors[ImGuiCol_MenuBarBg] = _panelColor;
+    style.Colors[ImGuiCol_Text] = _textColor;
+    style.Colors[ImGuiCol_Button] = _buttonColor;
+    style.Colors[ImGuiCol_ButtonHovered] = _buttonHoveredColor;
+    style.Colors[ImGuiCol_ButtonActive] = _buttonActiveColor;
+    style.Colors[ImGuiCol_Border] = _borderColor;
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.2f, 0.2f, 0.8f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.3f, 0.3f, 0.3f, 0.8f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.4f, 0.4f, 0.4f, 0.8f);
+    style.Colors[ImGuiCol_CheckMark] = _borderColor;
+    style.Colors[ImGuiCol_SliderGrab] = _borderColor;
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    
+    // Style
+    style.WindowRounding = 0.0f;
+    style.ChildRounding = 0.0f;
+    style.FrameRounding = 3.0f;
+    style.GrabRounding = 3.0f;
+    style.PopupRounding = 0.0f;
+    style.ScrollbarRounding = 0.0f;
+    style.TabRounding = 0.0f;
+    style.WindowBorderSize = 2.0f;
+    style.ChildBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.FrameBorderSize = 1.0f;
+    style.TabBorderSize = 0.0f;
+}
+
+void UIManager::newFrame() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    
+    int width, height;
+    glfwGetWindowSize(_window, &width, &height);
+    _layout.windowWidth = static_cast<float>(width);
+    _layout.windowHeight = static_cast<float>(height);
+    
+    _layout.renderAreaPos = ImVec2(_layout.leftPanelWidth + _layout.panelPadding, _layout.panelPadding);
+    _layout.renderAreaSize = ImVec2(
+        _layout.windowWidth - _layout.leftPanelWidth - (_layout.panelPadding * 2),
+        _layout.windowHeight - (_layout.panelPadding * 2)
+    );
+}
+
+void UIManager::render() {
+    renderControlPanel();
+    renderMainViewport();
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void UIManager::renderControlPanel() {
+    ImGui::SetNextWindowPos(ImVec2(_layout.panelPadding, _layout.panelPadding));
+    ImGui::SetNextWindowSize(ImVec2(_layout.leftPanelWidth, _layout.windowHeight - (_layout.panelPadding * 2)));
+    
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
+    
+    ImGui::Begin("Control Panel", nullptr, window_flags);
+    
+    ImGui::Text("SCOP Control Panel");
+    ImGui::Separator();
+    
+    renderMeshInfo();
+    ImGui::Separator();
+    
+    renderRenderingControls();
+    ImGui::Separator();
+    
+    renderModelControls();
+    ImGui::Separator();
+    
+    renderPerformanceStats();
+    
+    ImGui::End();
+}
+
+void UIManager::renderMeshInfo() {
+    if (ImGui::CollapsingHeader("Mesh Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("File: %s", _state.currentFile.c_str());
+        ImGui::Text("Vertices: %d", _state.vertexCount);
+        ImGui::Text("Indices: %d", _state.indexCount);
+        ImGui::Text("Triangles: %d", _state.triangleCount);
+        ImGui::Text("Materials: %d", _state.materialCount);
+    }
+}
+
+void UIManager::renderRenderingControls() {
+    if (ImGui::CollapsingHeader("Rendering Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+        
+        bool wireframe = _state.wireframeMode;
+        if (ImGui::Checkbox("Wireframe Mode [V]", &wireframe)) {
+            _state.wireframeMode = wireframe;
+            if (onWireframeModeChanged) {
+                onWireframeModeChanged(wireframe);
+            }
+        }
+        
+        bool vertices = _state.showVertices;
+        if (ImGui::Checkbox("Show Vertices [X]", &vertices)) {
+            _state.showVertices = vertices;
+            if (onVertexModeChanged) {
+                onVertexModeChanged(vertices);
+            }
+        }
+        
+        // Projection mode
+        bool ortho = _state.orthographicProjection;
+        if (ImGui::Checkbox("Orthographic [P]", &ortho)) {
+            _state.orthographicProjection = ortho;
+            if (onProjectionModeChanged) {
+                onProjectionModeChanged(ortho);
+            }
+        }
+        
+        // Auto rotation
+        bool autoRot = _state.autoRotation;
+        if (ImGui::Checkbox("Auto Rotation [1]", &autoRot)) {
+            _state.autoRotation = autoRot;
+            if (onAutoRotationChanged) {
+                onAutoRotationChanged(autoRot);
+            }
+        }
+    }
+}
+
+void UIManager::renderModelControls() {
+    if (ImGui::CollapsingHeader("Model Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Position: (%.2f, %.2f, %.2f)", 
+                   _state.cameraPosition.x, 
+                   _state.cameraPosition.y, 
+                   _state.cameraPosition.z);
+        
+        if (ImGui::Button("Reset Model [R]")) {
+            if (onResetCamera) {
+                onResetCamera();
+            }
+        }
+        
+        ImGui::Text("\nInteraction Controls:");
+        ImGui::Text("Left-click + drag - Pan model");
+        ImGui::Text("Right-click + drag - Rotate model");
+        ImGui::Text("Scroll wheel - Zoom in/out");
+        ImGui::Text("\nFixed Camera System:");
+        ImGui::Text("Camera position optimized for");
+        ImGui::Text("best model viewing automatically");
+    }
+}
+
+void UIManager::renderPerformanceStats() {
+    if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("FPS: %.1f", _state.fps);
+        ImGui::Text("Frame Time: %.3f ms", _state.frameTime * 1000.0f);
+        
+        static float fps_history[100] = {};
+        static int fps_history_offset = 0;
+        fps_history[fps_history_offset] = _state.fps;
+        fps_history_offset = (fps_history_offset + 1) % 100;
+        
+        ImGui::PlotLines("##FPS", fps_history, 100, fps_history_offset, 
+                        nullptr, 0.0f, 120.0f, ImVec2(0, 80));
+    }
+}
+
+void UIManager::renderMainViewport() {
+    ImGui::SetNextWindowPos(_layout.renderAreaPos);
+    ImGui::SetNextWindowSize(_layout.renderAreaSize);
+    
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
+                                   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+                                   ImGuiWindowFlags_NoBackground;
+    
+    ImGui::Begin("3D Viewport", nullptr, window_flags);
+
+    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+    ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    draw_list->AddRect(canvas_pos, 
+                      ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), 
+                      IM_COL32(230, 230, 230, 255),
+                      0.0f, 0, 2.0f);
+    
+    ImGui::End();
+}
+
+void UIManager::updateState(const UIState& newState) {
+    _state = newState;
+}
+
+void UIManager::updateMeshInfo(const Parser* parser) {
+    if (parser) {
+        _state.vertexCount = parser->getVertices().size();
+        _state.indexCount = parser->getIndices().size();
+        _state.triangleCount = _state.indexCount / 3;
+        _state.materialCount = parser->getMaterials().size();
+    }
+}
+
+void UIManager::updateCameraInfo(const InputManager* inputManager) {
+    if (inputManager) {
+        _state.cameraPosition = inputManager->getCameraPosition();
+        _state.autoRotation = inputManager->getAutorotationStatus();
+        _state.orthographicProjection = inputManager->isUsingOrthographic();
+    }
+}
+
+void UIManager::updatePerformanceStats(float deltaTime) {
+    _state.frameTime = deltaTime;
+    _state.fps = (deltaTime > 0.0f) ? (1.0f / deltaTime) : 0.0f;
+}
+
+void UIManager::setCurrentFile(const std::string& filename) {
+    _state.currentFile = filename;
+}

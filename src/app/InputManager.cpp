@@ -6,26 +6,30 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 17:17:20 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:52:09 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/InputManager.hpp"
 
-InputManager::InputManager(GLFWwindow *window, int mode, float optimalDistance, const BoundingBox &boundingBox): _window(window), _mode(mode), _boundingBox(boundingBox),
-    _cameraPos(0.0f, 0.0f, optimalDistance), _cameraFront(0.0f, 0.0f, -1.0f), _cameraUp(0.0f, 1.0f, 0.0f),
-    _lastX(960.0f), _lastY(540.0f), _yaw(-90.0f), _pitch(0.0f), _firstMouse(true),
-    _deltaTime(0.0f), _lastFrame(0.0f) {
+InputManager::InputManager(GLFWwindow *window, int mode, float optimalDistance, const BoundingBox &boundingBox): 
+    _window(window), _mode(mode), _boundingBox(boundingBox),
+    _deltaTime(0.0f), _lastFrame(0.0f), _mouseInteraction(MouseInteraction::None),
+    _modelOffset(0.0f), _modelRotation(0.0f), _fov(45.0f), _zoomLevel(1.0f),
+    _aspectRatio(16.0f/9.0f), _useOrthographic(false), _wireframeMode(false), 
+    _showVertices(false), _autoRotation(false), _autoRotationSpeed(30.0f),
+    _defaultDistance(optimalDistance) {
+    
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback_wrapper);
     glfwSetCursorPosCallback(window, mouse_callback_wrapper);
     glfwSetScrollCallback(window, scroll_callback_wrapper);
     glfwSetKeyCallback(window, key_callback_wrapper);
     
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    updateCameraVectors();
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     
-    _defaultDistance = optimalDistance;
+    calculateOptimalCameraPosition();
 }
 
 InputManager::~InputManager() {}
@@ -39,7 +43,7 @@ float InputManager::getLastFrame() const {
 }
 
 glm::vec3 InputManager::getCameraPosition() const {
-    return _cameraPos;
+    return _fixedCameraPos;
 }
 
 std::vector<glm::mat4> InputManager::getMatrices() const {
@@ -59,6 +63,22 @@ void InputManager::setDeltaTime(float currentFrame) {
 	_lastFrame = currentFrame;
 }
 
+void InputManager::setAspectRatio(float aspectRatio) {
+	_aspectRatio = aspectRatio;
+}
+
+void InputManager::setViewportBounds(const glm::vec4& bounds) {
+    _viewportBounds = bounds;
+}
+
+void InputManager::setUseOrthographic(bool useOrtho) {
+    _useOrthographic = useOrtho;
+}
+
+void InputManager::setAutoRotation(bool autoRotation) {
+    _autoRotation = autoRotation;
+}
+
 void InputManager::setProjectionToggleCallback(std::function<void(bool)> callback) {
     _onProjectionToggle = callback;
 }
@@ -72,9 +92,72 @@ void InputManager::framebuffer_size_callback(GLFWwindow* window, int width, int 
 	glViewport(0, 0, width, height);
 }
 
+void InputManager::mouse_button_callback_wrapper(GLFWwindow* window, int button, int action, int mods) {
+    InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
+    inputManager->mouse_button_callback(window, button, action, mods);
+}
+
+void InputManager::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    (void)mods;
+
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    
+    if (xpos < _viewportBounds.x || xpos > _viewportBounds.z || 
+        ypos < _viewportBounds.y || ypos > _viewportBounds.w) {
+        _mouseInteraction = MouseInteraction::None;
+        return;
+    }
+    
+    if (action == GLFW_PRESS) {
+        _lastMouseX = xpos;
+        _lastMouseY = ypos;
+        
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            _mouseInteraction = MouseInteraction::PanModel;
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            _mouseInteraction = MouseInteraction::RotateModel;
+        }
+    } else if (action == GLFW_RELEASE) {
+        _mouseInteraction = MouseInteraction::None;
+    }
+}
+
 void InputManager::mouse_callback_wrapper(GLFWwindow* window, double xpos, double ypos) {
-    InputManager *inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
+    InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
     inputManager->mouse_callback(window, xpos, ypos);
+}
+
+void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    (void)window;
+    
+    if (_mouseInteraction == MouseInteraction::None) {
+        return;
+    }
+
+    if (xpos < _viewportBounds.x || xpos > _viewportBounds.z || 
+        ypos < _viewportBounds.y || ypos > _viewportBounds.w) {
+        return;
+    }
+    
+    float xoffset = xpos - _lastMouseX;
+    float yoffset = _lastMouseY - ypos;
+    
+    _lastMouseX = xpos;
+    _lastMouseY = ypos;
+    
+    if (_mouseInteraction == MouseInteraction::PanModel) {
+        float sensitivity = 0.005f;
+        _modelOffset.x += xoffset * sensitivity;
+        _modelOffset.y += yoffset * sensitivity;
+    } else if (_mouseInteraction == MouseInteraction::RotateModel) {
+        float sensitivity = 0.5f;
+        _modelRotation.y += xoffset * sensitivity;
+        _modelRotation.x += yoffset * sensitivity;
+
+        if (_modelRotation.x > 89.0f) _modelRotation.x = 89.0f;
+        if (_modelRotation.x < -89.0f) _modelRotation.x = -89.0f;
+    }
 }
 
 void InputManager::scroll_callback_wrapper(GLFWwindow* window, double xoffset, double yoffset) {
@@ -87,45 +170,17 @@ void InputManager::key_callback_wrapper(GLFWwindow* window, int key, int scancod
     inputManager->key_callback(window, key, scancode, action, mods);
 }
 
-void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    (void)window;
-    
-    if (_firstMouse) {
-        _lastX = xpos;
-        _lastY = ypos;
-        _firstMouse = false;
-    }
-
-    float xoffset = xpos - _lastX;
-    float yoffset = _lastY - ypos;
-    _lastX = xpos;
-    _lastY = ypos;
-
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        float sensitivity = 0.5f;
-        _modelRotationX += yoffset * sensitivity;
-        _modelRotationY += xoffset * sensitivity;
-        
-        if (_modelRotationX > 89.0f) _modelRotationX = 89.0f;
-        if (_modelRotationX < -89.0f) _modelRotationX = -89.0f;
-    } else {
-        float sensitivity = 0.1f;
-        xoffset *= sensitivity;
-        yoffset *= sensitivity;
-
-        _yaw += xoffset;
-        _pitch += yoffset;
-
-        if (_pitch > 89.0f) _pitch = 89.0f;
-        if (_pitch < -89.0f) _pitch = -89.0f;
-
-        updateCameraVectors();
-    }
-}
-
 void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     (void)window;
     (void)xoffset;
+    
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+    
+    if (mouseX < _viewportBounds.x || mouseX > _viewportBounds.z || 
+        mouseY < _viewportBounds.y || mouseY > _viewportBounds.w) {
+        return;
+    }
     
     if (_useOrthographic) {
         _zoomLevel += (float)yoffset * 0.1f;
@@ -160,8 +215,8 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
         resetView();
         if (_useOrthographic) {
             resetView();
-            _modelRotationX = 35.265f;
-            _modelRotationY = 45.0f;
+            _modelRotation.x = 35.265f;
+            _modelRotation.y = 45.0f;
         }
 
         
@@ -172,6 +227,10 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 
     if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
         _autoRotation = !_autoRotation;
+        
+        if (_onAutoRotationToggle) {
+            _onAutoRotationToggle(_autoRotation);
+        }
     }
 
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
@@ -195,69 +254,51 @@ void InputManager::setVertexToggleCallback(std::function<void(bool)> callback) {
     _onVertexToggle = callback;
 }
 
-void InputManager::updateCameraVectors() {
-    glm::vec3 front;
-    front.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    front.y = sin(glm::radians(_pitch));
-    front.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    _cameraFront = glm::normalize(front);
-
-    glm::vec3 right = glm::normalize(glm::cross(_cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
-    
-    glm::vec3 up = glm::normalize(glm::cross(right, _cameraFront));
-    
-    glm::mat4 rollMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(_roll), _cameraFront);
-    _cameraUp = glm::vec3(rollMatrix * glm::vec4(up, 0.0f));
+void InputManager::setAutoRotationToggleCallback(std::function<void(bool)> callback) {
+    _onAutoRotationToggle = callback;
 }
 
-void InputManager::processInput() {
-    float cameraSpeed = _movementSpeed * _deltaTime;
-    float cameraRotation = _rotationSpeed * _deltaTime;
+void InputManager::calculateOptimalCameraPosition() {
+    float boundingBoxDiagonal = _boundingBox.getDiagonal();
+    float distance = boundingBoxDiagonal * 1.5f;
     
-    // Camera movement
-    if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
-        _cameraPos += cameraSpeed * _cameraFront;
-    if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
-        _cameraPos -= cameraSpeed * _cameraFront;
-    if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
-        _cameraPos -= glm::normalize(glm::cross(_cameraFront, _cameraUp)) * cameraSpeed;
-    if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
-        _cameraPos += glm::normalize(glm::cross(_cameraFront, _cameraUp)) * cameraSpeed;
-    if (glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        _cameraPos += cameraSpeed * _cameraUp;
-    if (glfwGetKey(_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-        _cameraPos -= cameraSpeed * _cameraUp;
-    
-    if (glfwGetKey(_window, GLFW_KEY_Q) == GLFW_PRESS) {
-        _roll -= cameraRotation;
-        updateCameraVectors();
-    }
-    if (glfwGetKey(_window, GLFW_KEY_E) == GLFW_PRESS) {
-        _roll += cameraRotation;
-        updateCameraVectors();
-    }
+    glm::vec3 modelCenter = _boundingBox.getCenter();
+    _fixedCameraPos = modelCenter + glm::vec3(0.0f, 0.0f, distance);
+    _fixedCameraTarget = modelCenter;
+    _fixedCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 }
+
+void InputManager::resetModelTransform() {
+    _modelOffset = glm::vec3(0.0f);
+    _modelRotation = glm::vec3(0.0f);
+}
+
+void InputManager::processInput() {}
 
 void InputManager::createMatrices() {
     if (_autoRotation) {
-        _modelRotationY += _autoRotationSpeed * _deltaTime;
+        _modelRotation.y += _autoRotationSpeed * _deltaTime;
     } 
     
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(_modelRotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(_modelRotationY), glm::vec3(0.0f, 1.0f, 0.0f));
     
-    glm::mat4 view = glm::lookAt(_cameraPos, _cameraPos + _cameraFront, _cameraUp);
+    model = glm::translate(model, _modelOffset);
+    
+    model = glm::rotate(model, glm::radians(_modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(_modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(_modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    glm::mat4 view = glm::lookAt(_fixedCameraPos, _fixedCameraTarget, _fixedCameraUp);
 
     glm::mat4 projection;
     if (_useOrthographic) {
         if (_mode == FDF) {
-            projection = createOrthographicProjectionForFDF(1920.0f / 1080.0f, 110, 190, 10.f * _zoomLevel);
+            projection = createOrthographicProjectionForFDF(_aspectRatio, 110, 190, 10.f * _zoomLevel);
         } else {
-            projection = createOrthographicProjection(1920.0f / 1080.0f, _zoomLevel);
+            projection = createOrthographicProjection(_aspectRatio, _zoomLevel);
         }
     } else {
-        projection = glm::perspective(glm::radians(_fov), 1920.0f / 1080.0f, 0.1f, 1000.0f);
+        projection = glm::perspective(glm::radians(_fov), _aspectRatio, 0.1f, 1000.0f);
     }
 
     _model = model;
@@ -293,25 +334,10 @@ glm::mat4 InputManager::createOrthographicProjectionForFDF(float aspectRatio, in
     return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, -50.0f, 50.0f);
 }
 
-void InputManager::updateCameraFront() {
-    glm::vec3 front;
-    front.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    front.y = sin(glm::radians(_pitch));
-    front.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    _cameraFront = glm::normalize(front);
-}
-
 void InputManager::resetView() {
-    _cameraPos = glm::vec3(0.0f, 0.0f, _defaultDistance);
-    _cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    _cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    _yaw = -90.0f;
-    _pitch = 0.0f;
-    _roll = 0.0f;
-    _modelRotationX = 0.0f;
-    _modelRotationY = 0.0f;
+    calculateOptimalCameraPosition();
+    resetModelTransform();
     _fov = 45.0f;
     _zoomLevel = 1.0f;
-    updateCameraVectors();
     std::cout << "View reset to default" << std::endl;
 }

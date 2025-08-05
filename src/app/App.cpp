@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 15:07:14 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:50:07 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,18 +49,14 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     
     _inputManager = std::make_unique<InputManager>(_window, _mode, optimalDistance, _parser->getBoundingBox());
     _textureLoader = std::make_unique<TextureLoader>();
+    _uiManager = std::make_unique<UIManager>(_window);
 
-    _inputManager->setProjectionToggleCallback([this](bool useOrtho) {
-        this->handleProjectionToggle(useOrtho);
-    });
-    
-    _inputManager->setWireframeToggleCallback([this](bool wireframeMode) {
-        this->handleWireframeToggle(wireframeMode);
-    });
-    
-    _inputManager->setVertexToggleCallback([this](bool showVertices) {
-        this->handleVertexToggle(showVertices);
-    });
+    // Initialize UI
+    if (!_uiManager->initialize()) {
+        std::cerr << "Failed to initialize UI\n";
+    }
+
+    setupUICallbacks();
 }
 
 App::~App() {
@@ -104,23 +100,112 @@ void App::run() {
         float currentFrame = glfwGetTime();
         _inputManager->setDeltaTime(currentFrame);
         
+        // Update UI state
+        _uiManager->updateMeshInfo(_parser);
+        _uiManager->updateCameraInfo(_inputManager.get());
+        _uiManager->updatePerformanceStats(_inputManager->getDeltaTime());
+        
+        // Start UI frame
+        _uiManager->newFrame();
+        
         _inputManager->processInput();
+        
+        // Calculate correct aspect ratio from render area
+        const auto& layout = _uiManager->getLayout();
+        float renderAreaWidth = layout.renderAreaSize.x - 16.0f; // Account for padding and borders
+        float renderAreaHeight = layout.renderAreaSize.y - 16.0f;
+        float aspectRatio = renderAreaWidth / renderAreaHeight;
+        
+        // Update InputManager with correct aspect ratio
+        _inputManager->setAspectRatio(aspectRatio);
+        
         _inputManager->createMatrices();
         
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
         _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
         
+        // Set viewport to render area only (convert ImGui coordinates to OpenGL)
+        // (reuse layout variable from above)
+        
+        // Calculate viewport accounting for ImGui window padding and borders
+        float windowPadding = 8.0f; // ImGui default window padding
+        float borderSize = 2.0f;    // Border thickness
+        
+        int viewportX = static_cast<int>(layout.renderAreaPos.x + windowPadding + borderSize);
+        int viewportY = static_cast<int>(layout.windowHeight - layout.renderAreaPos.y - layout.renderAreaSize.y + windowPadding + borderSize);
+        int viewportWidth = static_cast<int>(layout.renderAreaSize.x - (windowPadding + borderSize) * 2);
+        int viewportHeight = static_cast<int>(layout.renderAreaSize.y - (windowPadding + borderSize) * 2);
+        
+        // Ensure viewport dimensions are positive
+        viewportWidth = std::max(viewportWidth, 1);
+        viewportHeight = std::max(viewportHeight, 1);
+        
+        // Debug output (can be removed later)
+        static bool firstRun = true;
+        if (firstRun) {
+            std::cout << "Render area pos: (" << layout.renderAreaPos.x << ", " << layout.renderAreaPos.y << ")" << std::endl;
+            std::cout << "Render area size: (" << layout.renderAreaSize.x << ", " << layout.renderAreaSize.y << ")" << std::endl;
+            std::cout << "Window size: (" << layout.windowWidth << ", " << layout.windowHeight << ")" << std::endl;
+            std::cout << "Viewport: X=" << viewportX << ", Y=" << viewportY 
+                      << ", W=" << viewportWidth << ", H=" << viewportHeight << std::endl;
+            std::cout << "Aspect ratio: " << aspectRatio << std::endl;
+            
+            // Debug camera position
+            glm::vec3 camPos = _inputManager->getCameraPosition();
+            std::cout << "Camera position: (" << camPos.x << ", " << camPos.y << ", " << camPos.z << ")" << std::endl;
+            
+            firstRun = false;
+        }
+        
+        glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+        
+        // Update InputManager with viewport bounds for mouse interaction
+        glm::vec4 viewportBounds(
+            layout.renderAreaPos.x + windowPadding + borderSize,
+            layout.renderAreaPos.y + windowPadding + borderSize,
+            layout.renderAreaPos.x + layout.renderAreaSize.x - windowPadding - borderSize,
+            layout.renderAreaPos.y + layout.renderAreaSize.y - windowPadding - borderSize
+        );
+        _inputManager->setViewportBounds(viewportBounds);
+        
+        // Reset OpenGL state that might interfere with 3D rendering
+        glDisable(GL_SCISSOR_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        
+        // Set clear color and clear the buffers for the render area
+        setClearColor(Colors::BLACK_CHARCOAL_1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         const auto& materialGroups = _parser->getMaterialGroups();
         
         if (!materialGroups.empty() && !_materialTextures.empty()) {
+            // Debug: Material rendering path
+            static bool debugMaterials = true;
+            if (debugMaterials) {
+                std::cout << "Rendering with materials: " << materialGroups.size() << " groups" << std::endl;
+                debugMaterials = false;
+            }
             renderWithMaterials();
         } else {
+            // Debug: Fallback rendering path
+            static bool debugFallback = true;
+            if (debugFallback) {
+                std::cout << "Rendering with fallback (no materials)" << std::endl;
+                debugFallback = false;
+            }
             if (_currentTexture) {
                 _currentTexture->Bind(0);
             }
             _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices, _wireframeMode);
         }
+        
+        // Restore full viewport for UI rendering
+        glViewport(0, 0, 1920, 1080);
+        
+        // Render UI
+        _uiManager->render();
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
@@ -146,7 +231,7 @@ void App::renderWithMaterials() {
         _shader->use();
         
         if (_wireframeMode) {
-            // In wireframe mode, use the mesh's wireframe indices for all material groups
+
             int lineColorLoc = glGetUniformLocation(_shader->getID(), "u_lineColor");
             int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
             int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
@@ -160,7 +245,6 @@ void App::renderWithMaterials() {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->getWireframeIBO());
             GLCall(glDrawElements(GL_LINES, static_cast<GLsizei>(_mesh->getWireframeIndexCount()), GL_UNSIGNED_INT, nullptr));
             
-            // Only render wireframe once for all material groups
             break;
         } else {
             int renderMode = _mode == 0 ? GL_TRIANGLES : GL_LINES;
@@ -238,20 +322,107 @@ void App::renderWithMaterials() {
     }
 }
 
+void App::setCurrentFile(const std::string& filename) {
+    if (_uiManager) {
+        _uiManager->setCurrentFile(filename);
+    }
+}
+
+void App::setupUICallbacks() {
+    _inputManager->setProjectionToggleCallback([this](bool useOrtho) {
+        this->handleProjectionToggle(useOrtho);
+    });
+    
+    _inputManager->setWireframeToggleCallback([this](bool wireframeMode) {
+        this->handleWireframeToggle(wireframeMode);
+    });
+    
+    _inputManager->setVertexToggleCallback([this](bool showVertices) {
+        this->handleVertexToggle(showVertices);
+    });
+    
+    _inputManager->setAutoRotationToggleCallback([this](bool autoRotation) {
+        this->handleAutoRotationToggle(autoRotation);
+    });
+    
+    _uiManager->onWireframeModeChanged = [this](bool wireframeMode) {
+        this->handleWireframeToggle(wireframeMode);
+    };
+    
+    _uiManager->onVertexModeChanged = [this](bool showVertices) {
+        this->handleVertexToggle(showVertices);
+    };
+    
+    _uiManager->onProjectionModeChanged = [this](bool useOrtho) {
+        this->handleProjectionToggle(useOrtho);
+    };
+    
+    _uiManager->onAutoRotationChanged = [this](bool autoRotation) {
+        this->handleAutoRotationToggle(autoRotation);
+    };
+    
+    _uiManager->onResetCamera = [this]() {
+        if (_inputManager) {
+            _inputManager->resetView();
+        }
+    };
+}
+
 void App::handleProjectionToggle(bool useOrthographic) {
     _useOrthographic = useOrthographic;
+    
+    // Update InputManager state
+    if (_inputManager) {
+        _inputManager->setUseOrthographic(useOrthographic);
+    }
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.orthographicProjection = useOrthographic;
+        _uiManager->updateState(currentState);
+    }
+    
     std::cout << "Switched to " << (useOrthographic ? "Orthographic" : "Perspective") 
               << " projection" << std::endl;
 }
 
 void App::handleWireframeToggle(bool wireframeMode) {
     _wireframeMode = wireframeMode;
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.wireframeMode = wireframeMode;
+        _uiManager->updateState(currentState);
+    }
+    
     std::cout << "Wireframe mode " << (wireframeMode ? "ON" : "OFF") << std::endl;
 }
 
 void App::handleVertexToggle(bool showVertices) {
     _showVertices = showVertices;
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.showVertices = showVertices;
+        _uiManager->updateState(currentState);
+    }
+    
     std::cout << "Vertex visualization " << (showVertices ? "ON" : "OFF") << std::endl;
+}
+
+void App::handleAutoRotationToggle(bool autoRotation) {
+    // Update InputManager state
+    if (_inputManager) {
+        _inputManager->setAutoRotation(autoRotation);
+    }
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.autoRotation = autoRotation;
+        _uiManager->updateState(currentState);
+    }
+    
+    std::cout << "Auto-rotation " << (autoRotation ? "ON" : "OFF") << std::endl;
 }
 
 glm::mat4 App::createProjectionMatrix() {

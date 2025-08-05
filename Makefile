@@ -30,7 +30,7 @@ GLMDIR      = lib/glm
 
 # -=-=-=-=-    INCLUDES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-INCLUDES    = -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/glad -I$(INCLUDE_DIR)/KHR -I$(GLMDIR)
+INCLUDES    = -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/glad -I$(INCLUDE_DIR)/KHR -I$(GLMDIR) -I$(LIB_DIR)/imgui -I$(LIB_DIR)/imgui/backends
 
 # -=-=-=-=-    LIBRARIES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -46,6 +46,14 @@ endif
 
 GLAD_SRC    := include/glad/src/glad.c
 
+IMGUI_SRC   := lib/imgui/imgui.cpp \
+			   lib/imgui/imgui_demo.cpp \
+			   lib/imgui/imgui_draw.cpp \
+			   lib/imgui/imgui_tables.cpp \
+			   lib/imgui/imgui_widgets.cpp \
+			   lib/imgui/backends/imgui_impl_glfw.cpp \
+			   lib/imgui/backends/imgui_impl_opengl3.cpp
+
 SRC         := src/main.cpp \
 			   src/parser/Parser.cpp \
 			   src/app/App.cpp \
@@ -56,11 +64,13 @@ SRC         := src/main.cpp \
 			   src/renderer/Texture.cpp \
 			   src/renderer/TextureLoader.cpp \
 			   src/utils/ErrorManager.cpp \
+			   src/ui/UIManager.cpp \
 
 # Convert .c files to .o for glad
 GLAD_OBJ    = $(addprefix $(OBJ_DIR)/, $(GLAD_SRC:.c=.o))
-OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o)) $(GLAD_OBJ)
-DEPS        = $(addprefix $(DEP_DIR)/, $(SRC:.cpp=.d)) $(addprefix $(DEP_DIR)/, $(GLAD_SRC:.c=.d))
+IMGUI_OBJ   = $(addprefix $(OBJ_DIR)/, $(IMGUI_SRC:.cpp=.o))
+OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o)) $(GLAD_OBJ) $(IMGUI_OBJ)
+DEPS        = $(addprefix $(DEP_DIR)/, $(SRC:.cpp=.d)) $(addprefix $(DEP_DIR)/, $(GLAD_SRC:.c=.d)) $(addprefix $(DEP_DIR)/, $(IMGUI_SRC:.cpp=.d))
 
 # -=-=-=-=-    TARGETS -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -72,13 +82,19 @@ directories:
 	@mkdir -p $(OBJ_DIR)/src/obj
 	@mkdir -p $(OBJ_DIR)/src/renderer
 	@mkdir -p $(OBJ_DIR)/src/utils
+	@mkdir -p $(OBJ_DIR)/src/ui
 	@mkdir -p $(OBJ_DIR)/include/glad/src
+	@mkdir -p $(OBJ_DIR)/lib/imgui
+	@mkdir -p $(OBJ_DIR)/lib/imgui/backends
 	@mkdir -p $(DEP_DIR)/src/app
 	@mkdir -p $(DEP_DIR)/src/parser
 	@mkdir -p $(DEP_DIR)/src/obj
 	@mkdir -p $(DEP_DIR)/src/renderer
 	@mkdir -p $(DEP_DIR)/src/utils
+	@mkdir -p $(DEP_DIR)/src/ui
 	@mkdir -p $(DEP_DIR)/include/glad/src
+	@mkdir -p $(DEP_DIR)/lib/imgui
+	@mkdir -p $(DEP_DIR)/lib/imgui/backends
 	@mkdir -p $(LIB_DIR)
 
 glm:

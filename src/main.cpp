@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:51:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 15:48:10 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,9 @@ int main(int argc, char** argv) {
         Renderer renderer(&shader);
 
         App app(parser.getMode(), &mesh, &shader, &renderer, &parser);
+        
+        // Set the current file name for UI display
+        app.setCurrentFile(argv[1]);
 
         app.run();
 
