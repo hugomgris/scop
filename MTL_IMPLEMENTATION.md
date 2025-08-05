@@ -509,7 +509,7 @@ This foundation enables the rendering of complex, realistic 3D models while main
 
 ---
 
-**Author**: AI Assistant  
+**Author**: Hugo Muñoz Gris  
 **Date**: August 5, 2025  
 **Project**: SCOP - 42 School  
 **Version**: Multi-Material Implementation v1.0
