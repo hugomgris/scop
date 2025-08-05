@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 11:55:06 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,20 @@ void Parser::parseOBJ(const std::string &filePath) {
             glm::vec3 normal;
             iss >> normal.x >> normal.y >> normal.z;
             _normals.push_back(normal);
+        } else if (type == "mtllib") {
+            std::string mtlFileName;
+            iss >> mtlFileName;
+            
+            // Get the directory of the OBJ file
+            std::string objDir = filePath.substr(0, filePath.find_last_of("/\\"));
+            std::string mtlPath = objDir + "/" + mtlFileName;
+            
+            // Parse the MTL file
+            parseMTL(mtlPath);
+        } else if (type == "usemtl") {
+            std::string materialName;
+            iss >> materialName;
+            // Material usage could be tracked here if needed for per-face materials
         } else if (type == "f") {
             std::string vertexStr;
             std::vector<std::string> faceVertices;
@@ -185,6 +199,111 @@ void Parser::parseOBJ(const std::string &filePath) {
     std::cout << "Bounding box: Min(" << _boundingBox.min.x << ", " << _boundingBox.min.y << ", " << _boundingBox.min.z << ")" << std::endl;
     std::cout << "              Max(" << _boundingBox.max.x << ", " << _boundingBox.max.y << ", " << _boundingBox.max.z << ")" << std::endl;
     std::cout << "Optimal camera distance: " << getOptimalCameraDistance() << std::endl;
+}
+
+void Parser::parseMTL(const std::string &filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Warning: Could not open MTL file: " << filePath << std::endl;
+        return;
+    }
+
+    std::string line;
+    Material* currentMaterial = nullptr;
+
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue;
+
+        std::istringstream iss(line);
+        std::string type;
+        iss >> type;
+
+        if (type == "newmtl") {
+            std::string materialName;
+            iss >> materialName;
+            
+            _materials.emplace_back(materialName);
+            currentMaterial = &_materials.back();
+            
+            std::cout << "Found material: " << materialName << std::endl;
+            
+        } else if (currentMaterial != nullptr) {
+            if (type == "Ka") {
+                // Ambient color
+                iss >> currentMaterial->ambient.r >> currentMaterial->ambient.g >> currentMaterial->ambient.b;
+            } else if (type == "Kd") {
+                // Diffuse color
+                iss >> currentMaterial->diffuse.r >> currentMaterial->diffuse.g >> currentMaterial->diffuse.b;
+            } else if (type == "Ks") {
+                // Specular color
+                iss >> currentMaterial->specular.r >> currentMaterial->specular.g >> currentMaterial->specular.b;
+            } else if (type == "Ke") {
+                // Emission color
+                iss >> currentMaterial->emission.r >> currentMaterial->emission.g >> currentMaterial->emission.b;
+            } else if (type == "Ns") {
+                // Shininess
+                iss >> currentMaterial->shininess;
+            } else if (type == "d" || type == "Tr") {
+                // Opacity (d) or Transparency (Tr)
+                float value;
+                iss >> value;
+                if (type == "Tr") {
+                    currentMaterial->opacity = 1.0f - value; // Tr is transparency, d is opacity
+                } else {
+                    currentMaterial->opacity = value;
+                }
+            } else if (type == "Ni") {
+                // Refractive index
+                iss >> currentMaterial->refractiveIndex;
+            } else if (type == "illum") {
+                // Illumination model
+                iss >> currentMaterial->illuminationModel;
+            } else if (type == "map_Kd") {
+                // Diffuse texture map
+                std::string texturePath;
+                iss >> texturePath;
+                
+                // Get the directory of the MTL file for relative texture paths
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->diffuseMap = mtlDir + "/" + texturePath;
+                
+                std::cout << "Found diffuse texture: " << currentMaterial->diffuseMap << std::endl;
+                
+            } else if (type == "map_Ka") {
+                // Ambient texture map
+                std::string texturePath;
+                iss >> texturePath;
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->ambientMap = mtlDir + "/" + texturePath;
+            } else if (type == "map_Ks") {
+                // Specular texture map
+                std::string texturePath;
+                iss >> texturePath;
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->specularMap = mtlDir + "/" + texturePath;
+            } else if (type == "map_Bump" || type == "bump") {
+                // Normal/bump map
+                std::string texturePath;
+                iss >> texturePath;
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->normalMap = mtlDir + "/" + texturePath;
+            } else if (type == "map_d") {
+                // Opacity map
+                std::string texturePath;
+                iss >> texturePath;
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->opacityMap = mtlDir + "/" + texturePath;
+            } else if (type == "disp") {
+                // Displacement map
+                std::string texturePath;
+                iss >> texturePath;
+                std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
+                currentMaterial->displacementMap = mtlDir + "/" + texturePath;
+            }
+        }
+    }
+
+    std::cout << "Parsed " << _materials.size() << " materials from " << filePath << std::endl;
 }
 
 void Parser::parseFDF(const std::string &filePath) {
@@ -323,6 +442,19 @@ const std::vector<Vertex> &Parser::getVertices() const {
 
 const std::vector<unsigned int> &Parser::getIndices() const {
 	return _indices;
+}
+
+const std::vector<Material> &Parser::getMaterials() const {
+	return _materials;
+}
+
+const Material* Parser::getMaterialByName(const std::string& name) const {
+	for (const auto& material : _materials) {
+		if (material.name == name) {
+			return &material;
+		}
+	}
+	return nullptr;
 }
 
 void Parser::calculateNormals() {

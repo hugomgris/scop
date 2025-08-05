@@ -54,6 +54,7 @@ SRC         := src/main.cpp \
 			   src/renderer/Shader.cpp \
 			   src/renderer/Mesh.cpp \
 			   src/renderer/Texture.cpp \
+			   src/renderer/TextureLoader.cpp \
 			   src/utils/ErrorManager.cpp \
 
 # Convert .c files to .o for glad

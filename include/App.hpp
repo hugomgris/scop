@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:13:53 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "./Shader.hpp"
 # include "./InputManager.hpp"
 # include "./Texture.hpp"
+# include "./TextureLoader.hpp"
 # include "./ErrorManager.hpp"
 # include <memory>
 # include <iostream>
@@ -41,6 +42,8 @@ class App {
         Renderer *_renderer;
         GLFWwindow *_window;
         std::unique_ptr<InputManager> _inputManager;
+        std::unique_ptr<TextureLoader> _textureLoader;
+        std::shared_ptr<Texture> _currentTexture;
         
         bool _useOrthographic = false;
         bool _wireframeMode = false;

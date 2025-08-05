@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 11:55:28 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ class Parser {
 
 		const std::vector<Vertex> &getVertices() const;
 		const std::vector<unsigned int> &getIndices() const;
+		const std::vector<Material> &getMaterials() const;
+		const Material* getMaterialByName(const std::string& name) const;
 		size_t getRows() const;
 		size_t getColumns() const;
 		int getMode() const;
@@ -42,6 +44,7 @@ class Parser {
 		void checkExtension(const std::string &filePath) const;
 		void parse(const std::string &filePath);
 		void parseOBJ(const std::string &filePath);
+		void parseMTL(const std::string &filePath);
 		void parseFDF(const std::string &filePath);
 		void countFDFPositions(const std::string &filePath);
 		void calculateFDFSpacing();
@@ -66,6 +69,7 @@ class Parser {
 		//Final buffers
 		std::vector<Vertex> _vertices;
 		std::vector<unsigned int> _indices;
+		std::vector<Material> _materials;
 
 		//Lookup map
 		std::unordered_map<FaceKey, unsigned int> _faceMap;

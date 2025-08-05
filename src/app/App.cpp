@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 11:36:06 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     float optimalDistance = _parser->getOptimalCameraDistance();
     
     _inputManager = std::make_unique<InputManager>(_window, _mode, optimalDistance, _parser->getBoundingBox());
+    _textureLoader = std::make_unique<TextureLoader>();
 
     _inputManager->setProjectionToggleCallback([this](bool useOrtho) {
         this->handleProjectionToggle(useOrtho);
@@ -73,8 +74,30 @@ App::~App() {
 void App::run() {
     if (!_window) return;
 
-    Texture texture("resources/textures/Unicorns.png");
-    texture.Bind();
+    // Try to load texture from MTL materials first
+    const auto& materials = _parser->getMaterials();
+    
+    if (!materials.empty()) {
+        // Use the first material that has a texture
+        for (const auto& material : materials) {
+            _currentTexture = _textureLoader->loadMaterialTextures(material);
+            if (_currentTexture) {
+                std::cout << "Using texture from material: " << material.name << std::endl;
+                break;
+            }
+        }
+    }
+    
+    // Fallback to hardcoded texture if no material textures found
+    if (!_currentTexture) {
+        std::cout << "No material textures found, using fallback texture" << std::endl;
+        _currentTexture = _textureLoader->loadTexture("resources/textures/Unicorns.png");
+    }
+    
+    // If we still don't have a texture, we'll render without texture
+    if (_currentTexture) {
+        _currentTexture->Bind();
+    }
 
     _mesh->bind();
 
@@ -92,7 +115,9 @@ void App::run() {
         std::vector<glm::mat4> matrices = _inputManager->getMatrices();
         
         _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
-        texture.Bind(0);
+        if (_currentTexture) {
+            _currentTexture->Bind(0);
+        }
         _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices);
 
         glfwSwapBuffers(_window);
