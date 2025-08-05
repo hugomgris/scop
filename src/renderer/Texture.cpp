@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:37:46 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:13:13 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 11:25:13 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 Texture::Texture(const std::string &path): _filePath(path),
 	_localBufer(nullptr), _width(0), _height(0), _BPP(0)
 {
-	stbi_set_flip_vertically_on_load(1);
+	//stbi_set_flip_vertically_on_load(1);
 	_localBufer = stbi_load(path.c_str(), &_width, &_height, &_BPP, 4);
 	
 	GLCall(glGenTextures(1, &_rendererId));

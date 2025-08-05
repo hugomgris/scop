@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:38:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 18:28:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 11:54:31 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,33 @@ namespace std {
 struct ShaderProgramSource {
 	std::string vertexSource;
 	std::string fragmentSource;
+};
+
+struct Material {
+    std::string name;
+    
+    // Colors
+    glm::vec3 ambient = glm::vec3(0.2f);     // Ka
+    glm::vec3 diffuse = glm::vec3(0.8f);     // Kd  
+    glm::vec3 specular = glm::vec3(0.0f);    // Ks
+    glm::vec3 emission = glm::vec3(0.0f);    // Ke
+    
+    // Material properties
+    float shininess = 0.0f;                  // Ns
+    float opacity = 1.0f;                    // d or Tr
+    float refractiveIndex = 1.0f;            // Ni
+    int illuminationModel = 2;               // illum
+    
+    // Texture maps
+    std::string diffuseMap;                  // map_Kd
+    std::string normalMap;                   // map_Bump or bump
+    std::string specularMap;                 // map_Ks
+    std::string ambientMap;                  // map_Ka
+    std::string opacityMap;                  // map_d
+    std::string displacementMap;             // disp
+    
+    Material() = default;
+    Material(const std::string& materialName) : name(materialName) {}
 };
 
 #endif

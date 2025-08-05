@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:57 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 18:25:50 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 11:55:28 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,11 @@ class Parser {
 		//FDF stuff
 		size_t _cols, _rows;
 		float _xSpacing, _ySpacing, _zSpacing;
+
+		//UV generation
+		void generatePlanarUVs();
+		void generateSphericalUVs();
+		void generateCubicUVs();
 };
 
 #endif

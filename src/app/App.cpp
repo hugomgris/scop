@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:51:10 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 11:36:06 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ App::~App() {
 void App::run() {
     if (!_window) return;
 
-    Texture texture("resources/textures/Material.png");
+    Texture texture("resources/textures/Unicorns.png");
     texture.Bind();
 
     _mesh->bind();

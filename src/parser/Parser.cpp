@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/04 17:00:58 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 11:55:06 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ void Parser::parseOBJ(const std::string &filePath) {
 
     std::string line;
     bool hasNormals = false;
+    bool hasTexCoords = false; // Add this flag
 
     _boundingBox = BoundingBox();
     
@@ -100,6 +101,7 @@ void Parser::parseOBJ(const std::string &filePath) {
             updateBoundingBox(position);
             _positions.push_back(position);
         } else if (type == "vt") {
+            hasTexCoords = true; // Set flag when we find texture coordinates
             glm::vec2 textCoord;
             iss >> textCoord.x >> textCoord.y;
             _texCoords.push_back(textCoord);
@@ -160,6 +162,19 @@ void Parser::parseOBJ(const std::string &filePath) {
                 }
             }
         }
+    }
+    
+    // Generate texture coordinates if none were found
+    if (!hasTexCoords) {
+        std::cout << "No texture coordinates found in OBJ file. Generating UV coordinates..." << std::endl;
+        
+        // Choose the UV generation method based on your needs:
+        // For most cases, planar mapping works well
+        generateCubicUVs();
+        
+        // Alternatively, you could use:
+        // generateSphericalUVs(); // Good for spherical/organic objects
+        // generateCubicUVs();     // Good for box-like objects
     }
     
     if (!hasNormals) {
@@ -387,4 +402,85 @@ float Parser::getOptimalCameraDistance() const {
     distance = std::max(distance, 2.0f);
     
     return distance;
+}
+
+void Parser::generatePlanarUVs() {
+    std::cout << "Generating planar UV coordinates..." << std::endl;
+    
+    glm::vec3 size = _boundingBox.max - _boundingBox.min;
+    
+    int uAxis = (size.x >= size.y && size.x >= size.z) ? 0 : (size.y >= size.z) ? 1 : 2;
+    int vAxis = (uAxis == 0) ? ((size.y >= size.z) ? 1 : 2) : (uAxis == 1) ? ((size.x >= size.z) ? 0 : 2) : 1;
+    
+    for (size_t i = 0; i < _vertices.size(); i++) {
+        glm::vec3 pos = _vertices[i].position;
+        
+        float u, v;
+        switch(uAxis) {
+            case 0: u = pos.x; break;
+            case 1: u = pos.y; break;
+            case 2: u = pos.z; break;
+        }
+        switch(vAxis) {
+            case 0: v = pos.x; break;
+            case 1: v = pos.y; break;
+            case 2: v = pos.z; break;
+        }
+        
+        u = (u - _boundingBox.min[uAxis]) / size[uAxis];
+        v = (v - _boundingBox.min[vAxis]) / size[vAxis];
+        
+        _vertices[i].texCoord = glm::vec2(u, v);
+    }
+}
+
+void Parser::generateSphericalUVs() {
+    std::cout << "Generating spherical UV coordinates..." << std::endl;
+    
+    glm::vec3 center = (_boundingBox.min + _boundingBox.max) * 0.5f;
+    
+    for (size_t i = 0; i < _vertices.size(); i++) {
+        glm::vec3 pos = _vertices[i].position - center;
+        
+        float radius = glm::length(pos);
+        if (radius > 0.0f) {
+            pos = glm::normalize(pos);
+            
+            float theta = atan2(pos.z, pos.x);
+            float phi = acos(pos.y);
+            
+            float u = (theta + M_PI) / (2.0f * M_PI);
+            float v = phi / M_PI;
+            
+            _vertices[i].texCoord = glm::vec2(u, v);
+        } else {
+            _vertices[i].texCoord = glm::vec2(0.5f, 0.5f);
+        }
+    }
+}
+
+void Parser::generateCubicUVs() {
+    std::cout << "Generating cubic UV coordinates..." << std::endl;
+    
+    glm::vec3 center = (_boundingBox.min + _boundingBox.max) * 0.5f;
+    
+    for (size_t i = 0; i < _vertices.size(); i++) {
+        glm::vec3 pos = _vertices[i].position - center;
+        glm::vec3 absPos = glm::abs(pos);
+        
+        float u, v;
+        
+        if (absPos.x >= absPos.y && absPos.x >= absPos.z) {
+            u = (pos.z / absPos.x + 1.0f) * 0.5f;
+            v = (pos.y / absPos.x + 1.0f) * 0.5f;
+        } else if (absPos.y >= absPos.x && absPos.y >= absPos.z) {
+            u = (pos.x / absPos.y + 1.0f) * 0.5f;
+            v = (pos.z / absPos.y + 1.0f) * 0.5f;
+        } else {
+            u = (pos.x / absPos.z + 1.0f) * 0.5f;
+            v = (pos.y / absPos.z + 1.0f) * 0.5f;
+        }
+        
+        _vertices[i].texCoord = glm::vec2(u, v);
+    }
 }
