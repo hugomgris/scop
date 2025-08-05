@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:38:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 12:39:53 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,14 @@ struct Vertex {
 };
 
 struct Face {
-    unsigned int indices[3];  // Triangle indices
-    int materialIndex;        // Index into materials array (-1 = no material)
+    unsigned int indices[3];
+    int materialIndex;
 };
 
 struct MaterialGroup {
     std::string materialName;
     int materialIndex;
-    std::vector<unsigned int> indices;  // Indices for this material group
+    std::vector<unsigned int> indices;
 };
 
 struct FaceKey {
@@ -105,24 +105,24 @@ struct Material {
     std::string name;
     
     // Colors
-    glm::vec3 ambient = glm::vec3(0.2f);     // Ka
-    glm::vec3 diffuse = glm::vec3(0.8f);     // Kd  
-    glm::vec3 specular = glm::vec3(0.0f);    // Ks
-    glm::vec3 emission = glm::vec3(0.0f);    // Ke
+    glm::vec3 ambient = glm::vec3(0.2f);
+    glm::vec3 diffuse = glm::vec3(0.8f); 
+    glm::vec3 specular = glm::vec3(0.0f);
+    glm::vec3 emission = glm::vec3(0.0f);
     
     // Material properties
-    float shininess = 0.0f;                  // Ns
-    float opacity = 1.0f;                    // d or Tr
-    float refractiveIndex = 1.0f;            // Ni
-    int illuminationModel = 2;               // illum
+    float shininess = 0.0f;
+    float opacity = 1.0f;
+    float refractiveIndex = 1.0f;
+    int illuminationModel = 2;
     
     // Texture maps
-    std::string diffuseMap;                  // map_Kd
-    std::string normalMap;                   // map_Bump or bump
-    std::string specularMap;                 // map_Ks
-    std::string ambientMap;                  // map_Ka
-    std::string opacityMap;                  // map_d
-    std::string displacementMap;             // disp
+    std::string diffuseMap;
+    std::string normalMap;
+    std::string specularMap;
+    std::string ambientMap;
+    std::string opacityMap;
+    std::string displacementMap;
     
     Material() = default;
     Material(const std::string& materialName) : name(materialName) {}

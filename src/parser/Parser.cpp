@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 13:09:35 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,10 @@ void Parser::parseOBJ(const std::string &filePath) {
 
     std::string line;
     bool hasNormals = false;
-    bool hasTexCoords = false; // Add this flag
+    bool hasTexCoords = false;
 
     _boundingBox = BoundingBox();
     
-    // Initialize material tracking
     _currentMaterial = "";
     _currentMaterialIndex = -1;
     _materialGroups.clear();
@@ -106,7 +105,7 @@ void Parser::parseOBJ(const std::string &filePath) {
             updateBoundingBox(position);
             _positions.push_back(position);
         } else if (type == "vt") {
-            hasTexCoords = true; // Set flag when we find texture coordinates
+            hasTexCoords = true;
             glm::vec2 textCoord;
             iss >> textCoord.x >> textCoord.y;
             _texCoords.push_back(textCoord);
@@ -119,7 +118,6 @@ void Parser::parseOBJ(const std::string &filePath) {
             std::string mtlFileName;
             iss >> mtlFileName;
             
-            // Get the directory of the OBJ file
             std::string objDir = filePath.substr(0, filePath.find_last_of("/\\"));
             std::string mtlPath = objDir + "/" + mtlFileName;
             
@@ -132,7 +130,6 @@ void Parser::parseOBJ(const std::string &filePath) {
             _currentMaterial = materialName;
             _currentMaterialIndex = getMaterialIndex(materialName);
             
-            // Create a new material group if it doesn't exist
             bool found = false;
             for (auto& group : _materialGroups) {
                 if (group.materialName == materialName) {
@@ -203,7 +200,6 @@ void Parser::parseOBJ(const std::string &filePath) {
                     _indices.push_back(_faceMap[key]);
                 }
                 
-                // Add triangle indices to the current material group
                 if (_currentMaterialIndex >= 0 && !_materialGroups.empty()) {
                     for (auto& group : _materialGroups) {
                         if (group.materialName == _currentMaterial) {
@@ -218,17 +214,12 @@ void Parser::parseOBJ(const std::string &filePath) {
         }
     }
     
-    // Generate texture coordinates if none were found
     if (!hasTexCoords) {
         std::cout << "No texture coordinates found in OBJ file. Generating UV coordinates..." << std::endl;
         
-        // Choose the UV generation method based on your needs:
-        // For most cases, planar mapping works well
-        generateCubicUVs();
-        
-        // Alternatively, you could use:
-        // generateSphericalUVs(); // Good for spherical/organic objects
-        // generateCubicUVs();     // Good for box-like objects
+        //generatePlanarUVs();
+        generateSphericalUVs();
+        //generateCubicUVs();
     }
     
     if (!hasNormals) {
@@ -269,72 +260,58 @@ void Parser::parseMTL(const std::string &filePath) {
             
         } else if (currentMaterial != nullptr) {
             if (type == "Ka") {
-                // Ambient color
                 iss >> currentMaterial->ambient.r >> currentMaterial->ambient.g >> currentMaterial->ambient.b;
             } else if (type == "Kd") {
-                // Diffuse color
                 iss >> currentMaterial->diffuse.r >> currentMaterial->diffuse.g >> currentMaterial->diffuse.b;
             } else if (type == "Ks") {
-                // Specular color
                 iss >> currentMaterial->specular.r >> currentMaterial->specular.g >> currentMaterial->specular.b;
             } else if (type == "Ke") {
-                // Emission color
                 iss >> currentMaterial->emission.r >> currentMaterial->emission.g >> currentMaterial->emission.b;
             } else if (type == "Ns") {
                 // Shininess
                 iss >> currentMaterial->shininess;
             } else if (type == "d" || type == "Tr") {
-                // Opacity (d) or Transparency (Tr)
                 float value;
                 iss >> value;
                 if (type == "Tr") {
-                    currentMaterial->opacity = 1.0f - value; // Tr is transparency, d is opacity
+                    currentMaterial->opacity = 1.0f - value;
                 } else {
                     currentMaterial->opacity = value;
                 }
             } else if (type == "Ni") {
-                // Refractive index
                 iss >> currentMaterial->refractiveIndex;
             } else if (type == "illum") {
-                // Illumination model
                 iss >> currentMaterial->illuminationModel;
             } else if (type == "map_Kd") {
-                // Diffuse texture map
                 std::string texturePath;
                 iss >> texturePath;
                 
-                // Get the directory of the MTL file for relative texture paths
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
                 currentMaterial->diffuseMap = mtlDir + "/" + texturePath;
                 
                 std::cout << "Found diffuse texture: " << currentMaterial->diffuseMap << std::endl;
                 
             } else if (type == "map_Ka") {
-                // Ambient texture map
                 std::string texturePath;
                 iss >> texturePath;
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
                 currentMaterial->ambientMap = mtlDir + "/" + texturePath;
             } else if (type == "map_Ks") {
-                // Specular texture map
                 std::string texturePath;
                 iss >> texturePath;
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
                 currentMaterial->specularMap = mtlDir + "/" + texturePath;
             } else if (type == "map_Bump" || type == "bump") {
-                // Normal/bump map
                 std::string texturePath;
                 iss >> texturePath;
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
                 currentMaterial->normalMap = mtlDir + "/" + texturePath;
             } else if (type == "map_d") {
-                // Opacity map
                 std::string texturePath;
                 iss >> texturePath;
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));
                 currentMaterial->opacityMap = mtlDir + "/" + texturePath;
             } else if (type == "disp") {
-                // Displacement map
                 std::string texturePath;
                 iss >> texturePath;
                 std::string mtlDir = filePath.substr(0, filePath.find_last_of("/\\"));

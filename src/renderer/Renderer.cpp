@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 11:17:41 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 15:18:51 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,7 @@ void Renderer::setMatrices(const glm::mat4& model, const glm::mat4& view, const 
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices) {
-    int renderMode = mode == 0 ? GL_TRIANGLES : GL_LINES;
-
+void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices, bool wireframeMode) {
     setClearColor(Colors::BLACK_CHARCOAL_1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -38,41 +36,56 @@ void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showV
     int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
     int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
     
-    if (renderMode == GL_LINES) {
+    if (wireframeMode) {
         setLineColor(lineColorLoc, Colors::OFF_WHITE);
         glLineWidth(2.0f);
         glUniform1i(isLineModeLoc, 1);
         glUniform1i(isVertexModeLoc, 0);
+        
+        GLCall(glBindVertexArray(mesh.getVAO()));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getWireframeIBO());
+        GLCall(glDrawElements(GL_LINES, (GLsizei)mesh.getWireframeIndexCount(), GL_UNSIGNED_INT, nullptr));
+        
     } else {
-        glUniform1i(isLineModeLoc, 0);
-        glUniform1i(isVertexModeLoc, 0);
+        int renderMode = mode == 0 ? GL_TRIANGLES : GL_LINES;
         
-        int colorLoc = glGetUniformLocation(_shader->getID(), "u_color");
-        int lightPosLoc = glGetUniformLocation(_shader->getID(), "u_lightPos");
-        int lightColorLoc = glGetUniformLocation(_shader->getID(), "u_lightColor");
-        int viewPosLoc = glGetUniformLocation(_shader->getID(), "u_viewPos");
+        if (renderMode == GL_LINES) {
+            setLineColor(lineColorLoc, Colors::OFF_WHITE);
+            glLineWidth(2.0f);
+            glUniform1i(isLineModeLoc, 1);
+            glUniform1i(isVertexModeLoc, 0);
+        } else {
+            glUniform1i(isLineModeLoc, 0);
+            glUniform1i(isVertexModeLoc, 0);
+            
+            int colorLoc = glGetUniformLocation(_shader->getID(), "u_color");
+            int lightPosLoc = glGetUniformLocation(_shader->getID(), "u_lightPos");
+            int lightColorLoc = glGetUniformLocation(_shader->getID(), "u_lightColor");
+            int viewPosLoc = glGetUniformLocation(_shader->getID(), "u_viewPos");
+            
+            // Add texture uniforms here
+            int textureLoc = glGetUniformLocation(_shader->getID(), "u_texture");
+            int useTextureLoc = glGetUniformLocation(_shader->getID(), "useTexture");
+            
+            glUniform3f(colorLoc, 0.5, 0.5, 0.9);
+            
+            glm::vec3 lightPos(5.0f, 5.0f, 5.0f);
+            glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
+            
+            glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+            glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+            
+            glUniform3fv(viewPosLoc, 1, glm::value_ptr(cameraPos));
+            
+            // Set texture uniforms
+            glUniform1i(textureLoc, 0);  // Use texture unit 0
+            glUniform1i(useTextureLoc, 1);  // Enable texture usage (0 = no texture, toggleable)
+        }
         
-        // Add texture uniforms here
-        int textureLoc = glGetUniformLocation(_shader->getID(), "u_texture");
-        int useTextureLoc = glGetUniformLocation(_shader->getID(), "useTexture");
-        
-        glUniform3f(colorLoc, 0.5, 0.5, 0.9);
-        
-        glm::vec3 lightPos(5.0f, 5.0f, 5.0f);
-        glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
-        
-        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
-        
-        glUniform3fv(viewPosLoc, 1, glm::value_ptr(cameraPos));
-        
-        // Set texture uniforms
-        glUniform1i(textureLoc, 0);  // Use texture unit 0
-        glUniform1i(useTextureLoc, 1);  // Enable texture usage (0 = no texture, toggleable)
+        GLCall(glBindVertexArray(mesh.getVAO()));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getIBO());
+        GLCall(glDrawElements(renderMode, (GLsizei)mesh.getIndexCount(), GL_UNSIGNED_INT, nullptr));
     }
-    
-    GLCall(glBindVertexArray(mesh.getVAO()));
-    GLCall(glDrawElements(renderMode, (GLsizei)mesh.getIndexCount(), GL_UNSIGNED_INT, nullptr));
     
     if (showVertices) {
         glUniform1i(isVertexModeLoc, 1);

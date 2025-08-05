@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:20:52 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 15:07:14 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
     Renderer(Shader* shader);
     
     void setMatrices(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
-    void draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices = false);
+    void draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices = false, bool wireframeMode = false);
     void drawMaterialGroup(Mesh &mesh, const std::vector<unsigned int>& indices, int mode, const glm::vec3 &cameraPos, bool showVertices = false);
 };
 

@@ -506,10 +506,3 @@ The MTL file handling and multi-texture implementation represents a significant 
 - **Extensible design** that supports future enhancements
 
 This foundation enables the rendering of complex, realistic 3D models while maintaining compatibility with simple single-material objects, making the SCOP renderer suitable for a wide range of 3D content.
-
----
-
-**Author**: Hugo Muñoz Gris  
-**Date**: August 5, 2025  
-**Project**: SCOP - 42 School  
-**Version**: Multi-Material Implementation v1.0
