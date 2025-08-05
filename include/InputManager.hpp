@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:50:07 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 17:31:50 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,26 +37,21 @@ class InputManager {
 		int _mode;
 		const BoundingBox &_boundingBox;
 	
-		// Fixed camera system for optimal model viewing
 		glm::vec3 _fixedCameraPos;
 		glm::vec3 _fixedCameraTarget{0.0f};
 		glm::vec3 _fixedCameraUp{0.0f, 1.0f, 0.0f};
 		float _defaultDistance;
 		
-		// Model manipulation system
-		glm::vec3 _modelOffset{0.0f};     // Model translation
-		glm::vec3 _modelRotation{0.0f};   // Model rotation (pitch, yaw, roll)
-		float _modelScale = 1.0f;         // Model scale factor
+		glm::vec3 _modelOffset{0.0f};
+		glm::vec3 _modelRotation{0.0f};
+		float _modelScale = 1.0f;
 		
-		// Mouse interaction state
 		MouseInteraction _mouseInteraction = MouseInteraction::None;
 		double _lastMouseX = 0.0;
 		double _lastMouseY = 0.0;
+
+		glm::vec4 _viewportBounds{0.0f};
 		
-		// Viewport bounds for interaction detection
-		glm::vec4 _viewportBounds{0.0f}; // x, y, width, height
-		
-		// Model auto-rotation
 		bool _autoRotation = false;
 		float _autoRotationSpeed = 45.0f;
 
@@ -71,7 +66,7 @@ class InputManager {
 		
 		// Field of view
 		float _fov = 45.0f;
-		float _zoomLevel = 1.0f;
+		float _zoomLevel = 2.0f;
 
 		std::function<void(bool)> _onProjectionToggle;
 		std::function<void(bool)> _onWireframeToggle;
@@ -100,6 +95,7 @@ class InputManager {
 		void setViewportBounds(const glm::vec4& bounds);
 		void setUseOrthographic(bool useOrtho);
 		void setAutoRotation(bool autoRotation);
+		void setModelRotation(float x, float y);
 
 		void processInput();
 		void createMatrices();

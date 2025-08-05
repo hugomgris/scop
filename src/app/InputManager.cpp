@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:52:09 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 17:31:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,11 @@ void InputManager::setProjectionToggleCallback(std::function<void(bool)> callbac
 
 void InputManager::setWireframeToggleCallback(std::function<void(bool)> callback) {
     _onWireframeToggle = callback;
+}
+
+void InputManager::setModelRotation(float x, float y) {
+    _modelRotation.x = x;
+    _modelRotation.y = y;
 }
 
 void InputManager::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -211,14 +216,6 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         _useOrthographic = !_useOrthographic;
-
-        resetView();
-        if (_useOrthographic) {
-            resetView();
-            _modelRotation.x = 35.265f;
-            _modelRotation.y = 45.0f;
-        }
-
         
         if (_onProjectionToggle) {
             _onProjectionToggle(_useOrthographic);
@@ -338,6 +335,6 @@ void InputManager::resetView() {
     calculateOptimalCameraPosition();
     resetModelTransform();
     _fov = 45.0f;
-    _zoomLevel = 1.0f;
+    _zoomLevel = 2.0f;
     std::cout << "View reset to default" << std::endl;
 }

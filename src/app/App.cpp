@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:50:07 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 17:28:38 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     _textureLoader = std::make_unique<TextureLoader>();
     _uiManager = std::make_unique<UIManager>(_window);
 
-    // Initialize UI
     if (!_uiManager->initialize()) {
         std::cerr << "Failed to initialize UI\n";
     }
@@ -100,23 +99,19 @@ void App::run() {
         float currentFrame = glfwGetTime();
         _inputManager->setDeltaTime(currentFrame);
         
-        // Update UI state
         _uiManager->updateMeshInfo(_parser);
         _uiManager->updateCameraInfo(_inputManager.get());
         _uiManager->updatePerformanceStats(_inputManager->getDeltaTime());
         
-        // Start UI frame
         _uiManager->newFrame();
         
         _inputManager->processInput();
         
-        // Calculate correct aspect ratio from render area
         const auto& layout = _uiManager->getLayout();
-        float renderAreaWidth = layout.renderAreaSize.x - 16.0f; // Account for padding and borders
+        float renderAreaWidth = layout.renderAreaSize.x - 16.0f;
         float renderAreaHeight = layout.renderAreaSize.y - 16.0f;
         float aspectRatio = renderAreaWidth / renderAreaHeight;
         
-        // Update InputManager with correct aspect ratio
         _inputManager->setAspectRatio(aspectRatio);
         
         _inputManager->createMatrices();
@@ -125,23 +120,18 @@ void App::run() {
         
         _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
         
-        // Set viewport to render area only (convert ImGui coordinates to OpenGL)
-        // (reuse layout variable from above)
-        
-        // Calculate viewport accounting for ImGui window padding and borders
-        float windowPadding = 8.0f; // ImGui default window padding
-        float borderSize = 2.0f;    // Border thickness
+        float windowPadding = 8.0f;
+        float borderSize = 2.0f;
         
         int viewportX = static_cast<int>(layout.renderAreaPos.x + windowPadding + borderSize);
         int viewportY = static_cast<int>(layout.windowHeight - layout.renderAreaPos.y - layout.renderAreaSize.y + windowPadding + borderSize);
         int viewportWidth = static_cast<int>(layout.renderAreaSize.x - (windowPadding + borderSize) * 2);
         int viewportHeight = static_cast<int>(layout.renderAreaSize.y - (windowPadding + borderSize) * 2);
         
-        // Ensure viewport dimensions are positive
         viewportWidth = std::max(viewportWidth, 1);
         viewportHeight = std::max(viewportHeight, 1);
         
-        // Debug output (can be removed later)
+        // DEBUG
         static bool firstRun = true;
         if (firstRun) {
             std::cout << "Render area pos: (" << layout.renderAreaPos.x << ", " << layout.renderAreaPos.y << ")" << std::endl;
@@ -151,7 +141,6 @@ void App::run() {
                       << ", W=" << viewportWidth << ", H=" << viewportHeight << std::endl;
             std::cout << "Aspect ratio: " << aspectRatio << std::endl;
             
-            // Debug camera position
             glm::vec3 camPos = _inputManager->getCameraPosition();
             std::cout << "Camera position: (" << camPos.x << ", " << camPos.y << ", " << camPos.z << ")" << std::endl;
             
@@ -159,8 +148,7 @@ void App::run() {
         }
         
         glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-        
-        // Update InputManager with viewport bounds for mouse interaction
+
         glm::vec4 viewportBounds(
             layout.renderAreaPos.x + windowPadding + borderSize,
             layout.renderAreaPos.y + windowPadding + borderSize,
@@ -169,19 +157,16 @@ void App::run() {
         );
         _inputManager->setViewportBounds(viewportBounds);
         
-        // Reset OpenGL state that might interfere with 3D rendering
         glDisable(GL_SCISSOR_TEST);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-        
-        // Set clear color and clear the buffers for the render area
+
         setClearColor(Colors::BLACK_CHARCOAL_1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         const auto& materialGroups = _parser->getMaterialGroups();
         
         if (!materialGroups.empty() && !_materialTextures.empty()) {
-            // Debug: Material rendering path
             static bool debugMaterials = true;
             if (debugMaterials) {
                 std::cout << "Rendering with materials: " << materialGroups.size() << " groups" << std::endl;
@@ -189,7 +174,6 @@ void App::run() {
             }
             renderWithMaterials();
         } else {
-            // Debug: Fallback rendering path
             static bool debugFallback = true;
             if (debugFallback) {
                 std::cout << "Rendering with fallback (no materials)" << std::endl;
@@ -201,10 +185,8 @@ void App::run() {
             _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices, _wireframeMode);
         }
         
-        // Restore full viewport for UI rendering
         glViewport(0, 0, 1920, 1080);
         
-        // Render UI
         _uiManager->render();
 
         glfwSwapBuffers(_window);
@@ -370,8 +352,14 @@ void App::setupUICallbacks() {
 
 void App::handleProjectionToggle(bool useOrthographic) {
     _useOrthographic = useOrthographic;
+
+    _inputManager->resetView();
+    if (_useOrthographic) {
+        _inputManager->setModelRotation(35.265f, 45.0f);
+    } else {
+        _inputManager->setModelRotation(0.0f, 0.0f);
+    }
     
-    // Update InputManager state
     if (_inputManager) {
         _inputManager->setUseOrthographic(useOrthographic);
     }
@@ -411,7 +399,6 @@ void App::handleVertexToggle(bool showVertices) {
 }
 
 void App::handleAutoRotationToggle(bool autoRotation) {
-    // Update InputManager state
     if (_inputManager) {
         _inputManager->setAutoRotation(autoRotation);
     }

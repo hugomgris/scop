@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:52:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 18:17:16 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void UIManager::setupStyle() {
     // Style
     style.WindowRounding = 0.0f;
     style.ChildRounding = 0.0f;
-    style.FrameRounding = 3.0f;
+    style.FrameRounding = 0.0f;
     style.GrabRounding = 3.0f;
     style.PopupRounding = 0.0f;
     style.ScrollbarRounding = 0.0f;
@@ -96,10 +96,10 @@ void UIManager::newFrame() {
     _layout.windowWidth = static_cast<float>(width);
     _layout.windowHeight = static_cast<float>(height);
     
-    _layout.renderAreaPos = ImVec2(_layout.leftPanelWidth + _layout.panelPadding, _layout.panelPadding);
+    _layout.renderAreaPos = ImVec2(_layout.leftPanelWidth + _layout.panelPadding, _layout.panelPadding - 8);
     _layout.renderAreaSize = ImVec2(
         _layout.windowWidth - _layout.leftPanelWidth - (_layout.panelPadding * 2),
-        _layout.windowHeight - (_layout.panelPadding * 2)
+        _layout.windowHeight - (_layout.panelPadding) + 6
     );
 }
 
@@ -112,16 +112,25 @@ void UIManager::render() {
 }
 
 void UIManager::renderControlPanel() {
-    ImGui::SetNextWindowPos(ImVec2(_layout.panelPadding, _layout.panelPadding));
-    ImGui::SetNextWindowSize(ImVec2(_layout.leftPanelWidth, _layout.windowHeight - (_layout.panelPadding * 2)));
+    ImVec2 panelPos = ImVec2(_layout.panelPadding, _layout.panelPadding);
+    ImVec2 panelSize = ImVec2(_layout.leftPanelWidth, _layout.windowHeight - (_layout.panelPadding * 2));
+    
+    ImGui::SetNextWindowPos(panelPos);
+    ImGui::SetNextWindowSize(panelSize);
     
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
     
     ImGui::Begin("Control Panel", nullptr, window_flags);
     
-    ImGui::Text("SCOP Control Panel");
-    ImGui::Separator();
+    float headerHeight = 35.0f;
+    ImU32 headerColor = IM_COL32(70, 130, 180, 255);
+    ImU32 textColor = IM_COL32(255, 255, 255, 255);
+    
+    drawCustomFrameHeader("SCOP Control Panel", panelPos, _layout.leftPanelWidth, 
+                         headerHeight, headerColor, textColor);
+    
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerHeight + 10.0f);
     
     renderMeshInfo();
     ImGui::Separator();
@@ -166,7 +175,6 @@ void UIManager::renderRenderingControls() {
             }
         }
         
-        // Projection mode
         bool ortho = _state.orthographicProjection;
         if (ImGui::Checkbox("Orthographic [P]", &ortho)) {
             _state.orthographicProjection = ortho;
@@ -175,7 +183,6 @@ void UIManager::renderRenderingControls() {
             }
         }
         
-        // Auto rotation
         bool autoRot = _state.autoRotation;
         if (ImGui::Checkbox("Auto Rotation [1]", &autoRot)) {
             _state.autoRotation = autoRot;
@@ -225,8 +232,11 @@ void UIManager::renderPerformanceStats() {
 }
 
 void UIManager::renderMainViewport() {
-    ImGui::SetNextWindowPos(_layout.renderAreaPos);
-    ImGui::SetNextWindowSize(_layout.renderAreaSize);
+    ImVec2 viewportPos = _layout.renderAreaPos;
+    ImVec2 viewportSize = _layout.renderAreaSize;
+    
+    ImGui::SetNextWindowPos(viewportPos);
+    ImGui::SetNextWindowSize(viewportSize);
     
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
@@ -234,6 +244,20 @@ void UIManager::renderMainViewport() {
                                    ImGuiWindowFlags_NoBackground;
     
     ImGui::Begin("3D Viewport", nullptr, window_flags);
+
+    float headerHeight = 35.0f;
+    ImU32 headerColor = IM_COL32(229, 229, 217, 255);
+    ImU32 textColor = IM_COL32(31, 31, 33, 255);
+    
+    ImVec2 headerStartPos = ImGui::GetCursorScreenPos();
+    ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+    
+    ImGui::InvisibleButton("##header_space", ImVec2(availableRegion.x, headerHeight - 5));
+    
+    drawCustomFrameHeader("VIEWPORT", headerStartPos, availableRegion.x, 
+                         headerHeight, headerColor, textColor);
+
+    //ImGui::Spacing();
 
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
     ImVec2 canvas_size = ImGui::GetContentRegionAvail();
@@ -276,4 +300,25 @@ void UIManager::updatePerformanceStats(float deltaTime) {
 
 void UIManager::setCurrentFile(const std::string& filename) {
     _state.currentFile = filename;
+}
+
+void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float frameWidth, 
+                                     float headerHeight, ImU32 headerColor, ImU32 textColor) {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    
+    ImVec2 headerMin = framePos;
+    ImVec2 headerMax = ImVec2(framePos.x + frameWidth, framePos.y + headerHeight);
+    draw_list->AddRectFilled(headerMin, headerMax, headerColor);
+    
+    draw_list->AddLine(ImVec2(headerMin.x, headerMin.y), ImVec2(headerMax.x, headerMin.y), IM_COL32(229, 229, 217, 255), 1.0f);
+    draw_list->AddLine(ImVec2(headerMin.x, headerMin.y), ImVec2(headerMin.x, headerMax.y), IM_COL32(229, 229, 217, 255), 1.0f);  
+    draw_list->AddLine(ImVec2(headerMax.x, headerMin.y), ImVec2(headerMax.x, headerMax.y), IM_COL32(229, 229, 217, 255), 1.0f);
+    
+    ImVec2 textSize = ImGui::CalcTextSize(title);
+    ImVec2 textPos = ImVec2(
+        framePos.x + (frameWidth - textSize.x) * 0.5f,
+        framePos.y + (headerHeight - textSize.y) * 0.5f
+    );
+    
+    draw_list->AddText(textPos, textColor, title);
 }

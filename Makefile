@@ -27,6 +27,7 @@ DEP_DIR     = .dep
 INCLUDE_DIR = include
 LIB_DIR     = lib
 GLMDIR      = lib/glm
+IMGUIDIR    = lib/imgui
 
 # -=-=-=-=-    INCLUDES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -74,7 +75,7 @@ DEPS        = $(addprefix $(DEP_DIR)/, $(SRC:.cpp=.d)) $(addprefix $(DEP_DIR)/, 
 
 # -=-=-=-=-    TARGETS -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-all: directories glm $(NAME)
+all: directories glm imgui $(NAME)
 
 directories:
 	@mkdir -p $(OBJ_DIR)/src/app
@@ -104,6 +105,13 @@ glm:
 		echo "$(GREEN)GLM library cloned successfully!$(DEF_COLOR)"; \
 	fi
 
+imgui:
+	@if [ ! -d "$(IMGUIDIR)" ]; then \
+		echo "$(YELLOW)ImGui library not found, cloning from GitHub...$(DEF_COLOR)"; \
+		git clone https://github.com/ocornut/imgui.git $(IMGUIDIR); \
+		echo "$(GREEN)ImGui library cloned successfully!$(DEF_COLOR)"; \
+	fi
+
 -include $(DEPS)
 
 # Compile C++ files
@@ -122,43 +130,6 @@ $(NAME): $(OBJS) Makefile
 	@echo "$(GREEN)$(NAME) compiled!$(DEF_COLOR)"
 	@echo "$(CYAN)I have become scop, the renderer of worlds!$(DEF_COLOR)"
 
-# -=-=-=-=-    DOCUMENTATION -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-DOXYGEN_VERSION = 1.10.0
-DOXYGEN_DIR = $(HOME)/doxygen-$(DOXYGEN_VERSION)
-DOXYGEN_BIN = $(DOXYGEN_DIR)/bin/doxygen
-
-# Generate project documentation using Doxygen
-# NOTE: This target will work with or without Graphviz installed:
-#   - WITH Graphviz: Generates full docs including dependency graphs, call graphs,
-#     class collaboration diagrams, and inheritance charts
-#   - WITHOUT Graphviz: Generates complete documentation but without visual graphs
-#
-# To enable visual graphs, install Graphviz on your system:
-#   Ubuntu/Debian: sudo apt-get install graphviz
-#   macOS: brew install graphviz
-#   Arch: sudo pacman -S graphviz
-doxy: $(DOXYGEN_BIN)
-	@if command -v dot >/dev/null 2>&1; then \
-		echo "$(GREEN)Generating documentation with Graphviz support$(DEF_COLOR)"; \
-	else \
-		echo "$(YELLOW)Generating documentation without graphs (Graphviz not found)$(DEF_COLOR)"; \
-		echo "$(CYAN)Tip: Install graphviz package to enable dependency graphs$(DEF_COLOR)"; \
-	fi
-	@$(DOXYGEN_BIN) Doxyfile
-	@echo "$(GREEN)Documentation generated in docs/html/index.html$(DEF_COLOR)"
-
-$(DOXYGEN_BIN):
-	@echo "$(CYAN)Downloading Doxygen$(DEF_COLOR)"
-	@wget -q https://www.doxygen.nl/files/doxygen-$(DOXYGEN_VERSION).linux.bin.tar.gz -O /tmp/doxygen.tar.gz
-	@tar -xzf /tmp/doxygen.tar.gz -C $(HOME)
-	@rm /tmp/doxygen.tar.gz
-	@echo "$(GREEN)Doxygen installed successfully$(DEF_COLOR)"
-
-doxyclean:
-	@rm -rf docs/html/ docs/latex/ docs/xml/ docs/rtf/ docs/man/ docs/docbook/
-	@echo "$(RED)Cleaned documentation files$(DEF_COLOR)"
-
 # -=-=-=-=-    CLEANUP -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 clean:
@@ -170,6 +141,8 @@ fclean: clean
 	@echo "$(RED)Cleaned all binaries$(DEF_COLOR)"
 	@$(RM) $(GLMDIR)
 	@echo "$(RED)Cleaned GLM library$(DEF_COLOR)"
+	@$(RM) $(IMGUIDIR)
+	@echo "$(RED)Cleaned ImGui library$(DEF_COLOR)"
 
 re: fclean all
 
@@ -182,5 +155,6 @@ check-deps:
 	@pkg-config --exists glfw3 && echo "$(GREEN)✓ GLFW3 found$(DEF_COLOR)" || echo "$(RED)✗ GLFW3 not found$(DEF_COLOR)"
 	@pkg-config --exists gl && echo "$(GREEN)✓ OpenGL found$(DEF_COLOR)" || echo "$(RED)✗ OpenGL not found$(DEF_COLOR)"
 	@if [ -d "$(GLMDIR)" ]; then echo "$(GREEN)✓ GLM found$(DEF_COLOR)"; else echo "$(RED)✗ GLM not found$(DEF_COLOR)"; fi
+	@if [ -d "$(IMGUIDIR)" ]; then echo "$(GREEN)✓ ImGui found$(DEF_COLOR)"; else echo "$(RED)✗ ImGui not found$(DEF_COLOR)"; fi
 
 .PHONY: all clean fclean re directories glm doxy doxyclean run run42 list-models check-deps

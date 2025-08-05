@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:20:16 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/05 17:52:39 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,11 @@ private:
     void renderModelControls();
     void renderPerformanceStats();
     void renderMainViewport();
+
+	void drawCustomFrameHeader(const char* title, ImVec2 framePos, float frameWidth, 
+                              float headerHeight, ImU32 headerColor, ImU32 textColor);
+    void renderStyledSection(const char* title, std::function<void()> contentCallback);
+    void renderMeshInfoStyled();
 
 public:
     UIManager(GLFWwindow* window);
