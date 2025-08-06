@@ -257,7 +257,11 @@ for (size_t i = 0; i < triangleIndices.size(); i += 3) {
 }
 ```
 
-This ensures full control over edge visibility and appearance, allowing manual tweaking of line width, color and overall general presentation. (What I mean with this is that it's not only better, but *cooler*; check the `resources/objects/ninja/Ninja.obj` rendering and toggle the CRT effect and Wireframe mode on and be transported to a retro futuristic realm of *awesome* graphics) (Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
+This ensures full control over edge visibility and appearance, allowing manual tweaking of line width, color and overall general presentation.
+
+(What I mean with this is that it's not only better, but *cooler*; check the `resources/objects/ninja/Ninja.obj` rendering and toggle the CRT effect and Wireframe mode on and be transported to a retro futuristic realm of *awesome* graphics) 
+
+(Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
 
 ## Shader Programming: The GPU Workhorses 🎨
 
