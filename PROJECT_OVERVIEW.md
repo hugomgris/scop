@@ -237,19 +237,19 @@ By using indices, EBOs reduce memory usage and increase rendering efficiency. Fo
 
 ## Advanced Wireframe Implementation
 
-A custom wireframe system addresses limitations in OpenGL’s native wireframe mode:
+A custom wireframe system was implemented to overcome the limitations of OpenGL’s native `glPolygonMode`.
 
-### Limitations of glPolygonMode
+### Limitations of `glPolygonMode`
 
 - Inconsistent rendering of shared triangle edges  
-- Inability to combine with filled rendering  
-- Limited visual control
+- Incompatibility with simultaneous filled and wireframe rendering  
+- Lack of fine control over visual presentation
 
-(In other words, with `glPolygonMode` you're most likely going to lose edges/lines when trying to render the wireframe visualization of your parsed model, specially if it's a slightly complex one (i.e., not a cube))
+In practice, `glPolygonMode` often fails to render edge details accurately for complex models, resulting in missing lines and visual artifacts.
 
 ### Custom Wireframe Solution
 
-Instead of relaying in the built-in polygon outline methods, the custom wireframe pipeline breaks triangles into explicit line segments for each edge in the mesh:
+Instead of relying on OpenGL’s built-in polygon outline mode, the custom wireframe pipeline explicitly breaks each triangle into individual line segments:
 
 ```cpp
 for (size_t i = 0; i < triangleIndices.size(); i += 3) {
@@ -257,44 +257,44 @@ for (size_t i = 0; i < triangleIndices.size(); i += 3) {
 }
 ```
 
-This ensures full control over edge visibility and appearance, allowing manual tweaking of line width, color and overall general presentation.
+This method ensures consistent rendering of all mesh edges. It also provides full control over visual characteristics such as line width, color, and blending, allowing for stylized presentations.
 
-(What I mean with this is that it's not only better, but *cooler*; check the `resources/objects/ninja/Ninja.obj` rendering and toggle the CRT effect and Wireframe mode on and be transported to a retro futuristic realm of *awesome* graphics) 
+---
 
-(Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
+## Shader Programming: GPU-Based Rendering Logic
 
-![Snake, we're not tools of the Government, or anyone else](img/screenshot_03.png)
+Shaders are GPU-executed programs responsible for transforming and shading geometry. They enable efficient, highly parallel rendering and are a fundamental part of modern graphics pipelines.
 
-## Shader Programming: Talking With the GPU and *Understanding Each Other*
-
-Shaders execute on the GPU, enabling efficient parallel processing. They can basically be understood as pieces of source code sent to the GPU's side of the fence so that it can draw the data in specific ways. Shader types are extensive, but there are two main categories that are necessary for any visualization.
+This project uses two core shader types: **vertex shaders** and **fragment shaders**.
 
 ### Vertex Shaders
 
-Vertex shaders are used to map vertices in the 3D space inside the GPU's mind. If, for example, the .obj raw data defines a basic cube, with a specific distance between vertices, these shaders are used (via OpenGL uniforms) to build the vertex model that will be used to build the 3D representation.
-
-In essence, transformations are applied to convert world coordinates into screen space:
+Vertex shaders transform object-space vertex data into screen-space coordinates. In this implementation, standard transformation matrices (`model`, `view`, `projection`) are passed to the shader via uniforms:
 
 ```glsl
 gl_Position = projection * view * model * vec4(aPos, 1.0);
-...
 ```
+
+This stage determines the position of each vertex in the final rendered frame.
 
 ### Fragment Shaders
 
-Fragment Shaders are in charge of "coloring" the model. Following the cube example, the overall shape's layout is formed by triangles (remember: VBO->VAO->EBO), and those triangles need to be rasterized in screen space in some way, be that using pre-defined flat colors or texture-based materials (.obj<->.mtl). This project's implementation has a couple shaders, one for the rendering of the faces itself (calculating base color, light affectations, specular influence, etc), and one for the post-processing CRT effect (lens deformation, chromatic aberration, scanlines, etc). 
+Fragment shaders compute per-pixel color, handling lighting, texturing, and shading effects. In this project, two primary fragment shaders are used:
 
-Color and lighting are computed per-pixel, typically using the Phong reflection model:
+1. A material shader for standard surface rendering (diffuse, ambient, and specular lighting).
+2. A post-processing shader for CRT effects, including lens distortion, chromatic aberration, and scanlines.
 
 ```glsl
 vec3 result = (ambient + diffuse) * texture(u_texture, TexCoord).rgb;
 ```
 
-This technique yields smooth shading and material-specific lighting.
+Lighting calculations use the Phong reflection model to produce smooth and realistic shading.
 
-### Multi-Texture Material System 🎭
+---
 
-This SCOP supports rendering of models with multiple materials through grouped draw calls. If an object has more than one material/texture those are pre-processed and stored in memory, so that the drawing process can loop through the different materials (tied to faces by the .obj layout; caught by the parsing):
+## Multi-Texture Material System 🎭
+
+SCOP supports models with multiple materials through grouped draw calls. During parsing, material-face associations are preserved and grouped accordingly. At render time, the engine iterates through material groups, binding the appropriate texture before issuing draw calls:
 
 ```cpp
 for (const auto &materialGroup : materialGroups) {
@@ -302,9 +302,18 @@ for (const auto &materialGroup : materialGroups) {
 }
 ```
 
-Grouping faces by material minimizes expensive state changes such as texture binding.
+This minimizes costly GPU state changes, such as texture binding, and ensures efficient batch rendering of complex models.
 
-(It also allows this implementation to render Mario's head like it was 1997 and we were playing with our flamming hot Nintendo 64).
+---
+
+## Notes
+
+- The `resources/objects/ninja/Ninja.obj` model is particularly effective at demonstrating the visual impact of the custom wireframe mode combined with CRT post-processing.
+- For users interested in nostalgic aesthetics, enabling both the CRT and wireframe effects simulates a retro-futuristic rendering style reminiscent of late-90s hardware.
+- *“We're not tools of the government, or anyone else…”* — Gray Fox  
+- Mario head test render inspired by *Super Mario 64*'s iconic intro. Texture loading and material grouping allow faithful recreation of the N64-style look.
+
+![Sample render with CRT and wireframe enabled](img/screenshot_03.png)
 
 ## UI Integration 🖥️
 
