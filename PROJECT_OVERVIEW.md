@@ -127,7 +127,7 @@ make list-models
 
 
 ## In-depth Overview
-As mentioned in the General Description, 
+As mentioned in the General Description, this project was developed as an introduction to the OpenGL API and as a practice environment for standard graphics rendering pipelines. After working on other rendering assignments based on the [MLX42 library] (https://github.com/codam-coding-college/MLX42/blob/master/docs/42.md?utm_source=chatgpt.com), which can be defined as an OpenGL wrapper designed to work as a simplified API for entry level studen projects, the opportunity here is to traverse at a lower computational level, working directly with the core functionality and leaving behind the high abstraction of a second order library.  
 
 
 ## Execution Pipeline Structure
