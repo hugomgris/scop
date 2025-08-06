@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:19:28 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:33:00 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,7 +346,7 @@ glm::mat4 InputManager::createOrthographicProjectionForFDF(float aspectRatio, in
     float orthoWidth = orthoSize * aspectRatio;
     float orthoHeight = orthoSize;
     
-    return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, -50.0f, 100.0f);
+    return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, -5000.0f, 10000.0f);
 }
 
 void InputManager::resetView() {
