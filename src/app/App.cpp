@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 14:36:25 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:31:51 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ void App::renderWithMaterials() {
             int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
             
             setLineColor(lineColorLoc, Colors::OFF_WHITE);
-            glLineWidth(2.0f);
+            glLineWidth(1.0f);
             glUniform1i(isLineModeLoc, 1);
             glUniform1i(isVertexModeLoc, 0);
             
@@ -282,7 +282,7 @@ void App::renderWithMaterials() {
                 int isVertexModeLoc = glGetUniformLocation(_shader->getID(), "u_isVertexMode");
                 
                 setLineColor(lineColorLoc, Colors::OFF_WHITE);
-                glLineWidth(2.0f);
+                glLineWidth(1.0f);
                 glUniform1i(isLineModeLoc, 1);
                 glUniform1i(isVertexModeLoc, 0);
             } else {

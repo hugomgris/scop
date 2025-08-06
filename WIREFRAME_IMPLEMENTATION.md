@@ -108,7 +108,7 @@ if (wireframeMode) {
     int isLineModeLoc = glGetUniformLocation(_shader->getID(), "u_isLineMode");
     
     setLineColor(lineColorLoc, Colors::OFF_WHITE);
-    glLineWidth(2.0f);
+    glLineWidth(1.0f);
     glUniform1i(isLineModeLoc, 1);
     
     // Bind wireframe-specific buffer and render

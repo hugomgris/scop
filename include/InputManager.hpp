@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:07:29 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:15:57 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class InputManager {
 		
 		// Field of view
 		float _fov = 45.0f;
-		float _zoomLevel = 2.0f;
+		float _zoomLevel = 5.0f;
 
 		std::function<void(bool)> _onProjectionToggle;
 		std::function<void(bool)> _onWireframeToggle;
