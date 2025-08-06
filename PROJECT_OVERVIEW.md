@@ -18,7 +18,7 @@
 </p>
 
 ## General Description
-SCOP (which stands for "scope" - as in having a view or vision) is a comprehensive 3D object visualization application that can load, display, and interact with 3D objects stored in common file formats (.obj and .fdf). It was developed as an introduction to the OpenGL API, and as a crossover with the FDF renderer (a 2D map based wireframe visualizer). Beyond basic visualization, the project also implements a custom user interface (ImGui), post-processing shaders, and a complex .obj., .fdf and .mtl parsing pipeline. 
+SCOP (which stands for "scope" - as in having a view or vision) is a comprehensive 3D object visualization application that can load, display, and interact with 3D objects stored in common file formats (.obj and .fdf). It was developed as an introduction to the OpenGL API, and as a crossover with the [FDF renderer](https://github.com/hugomgris/FDFPP) (a 2D map based wireframe visualizer). Beyond basic visualization, the project also implements a custom user interface (ImGui), post-processing shaders, and a complex .obj., .fdf and .mtl parsing pipeline. 
 
 ## Preview
 
@@ -126,6 +126,10 @@ make list-models
 | `Esc` | Exit application |
 
 
+## In-depth Overview
+As mentioned in the General Description, 
+
+
 ## Execution Pipeline Structure
 
 The SCOP rendering pipeline follows a systematic flow from file input to final frame display:
@@ -214,6 +218,4 @@ OUTPUT LAYER:
 │ └─────────────┘    └─────────────┘    └─────────────┘   │
 └─────────────────────────────────────────────────────────┘
 ```
-
-## In-depth Overview
 
