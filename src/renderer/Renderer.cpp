@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 10:10:03 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 14:02:17 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,9 @@ void Renderer::setMatrices(const glm::mat4& model, const glm::mat4& view, const 
 }
 
 void Renderer::draw(Mesh &mesh, int mode, const glm::vec3 &cameraPos, bool showVertices, bool wireframeMode) {
-    setClearColor(Colors::BLACK_CHARCOAL_1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Don't clear here - clearing should be done by the caller based on context
+    // setClearColor(Colors::BLACK_CHARCOAL_1);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     _shader->use();
 

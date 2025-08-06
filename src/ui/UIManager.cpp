@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 12:51:50 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,6 +220,14 @@ void UIManager::renderRenderingControls() {
             _state.autoRotation = autoRot;
             if (onAutoRotationChanged) {
                 onAutoRotationChanged(autoRot);
+            }
+        }
+
+        bool crtEffect = _state.enableCRT;
+        if (ImGui::Checkbox("CRT Effect [C]", &crtEffect)) {
+            _state.enableCRT = crtEffect;
+            if (onCRTModeChanged) {
+                onCRTModeChanged(crtEffect);
             }
         }
 

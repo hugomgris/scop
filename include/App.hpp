@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 16:50:07 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include "./Texture.hpp"
 # include "./TextureLoader.hpp"
 # include "./UIManager.hpp"
+# include "./PostProcessor.hpp"
 # include "./ErrorManager.hpp"
 # include "./Colors.hpp"
 # include <glad/glad.h>
@@ -49,12 +50,14 @@ class App {
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<TextureLoader> _textureLoader;
         std::unique_ptr<UIManager> _uiManager;
+        std::unique_ptr<PostProcessor> _postProcessor;
         std::shared_ptr<Texture> _currentTexture;
         std::unordered_map<int, std::shared_ptr<Texture>> _materialTextures;
         
         bool _useOrthographic = false;
         bool _wireframeMode = false;
         bool _showVertices = false;
+        bool _enableCRT = false;
         
         // UI callback handlers
         void setupUICallbacks();
@@ -70,6 +73,7 @@ class App {
         void handleWireframeToggle(bool wireframeMode);
         void handleVertexToggle(bool showVertices);
         void handleAutoRotationToggle(bool autoRotation);
+        void handleCRTToggle(bool enableCRT);
         void renderWithMaterials();
 
         glm::mat4 createProjectionMatrix();

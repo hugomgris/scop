@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:18 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:27:38 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,9 @@ class Shader {
 
         void setUniform(const std::string& name, int value);
         void setUniform(const std::string& name, float value);
-        void setUniform(const std::string& name, const glm::mat4& matrix);
+        void setUniform(const std::string& name, const glm::vec2& vector);
         void setUniform(const std::string& name, const glm::vec3& vector);
+        void setUniform(const std::string& name, const glm::mat4& matrix);
         
     private:
         unsigned int _vs;

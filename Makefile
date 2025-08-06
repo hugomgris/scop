@@ -64,6 +64,7 @@ SRC         := src/main.cpp \
 			   src/renderer/Mesh.cpp \
 			   src/renderer/Texture.cpp \
 			   src/renderer/TextureLoader.cpp \
+			   src/renderer/PostProcessor.cpp \
 			   src/utils/ErrorManager.cpp \
 			   src/ui/UIManager.cpp \
 

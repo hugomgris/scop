@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 17:28:38 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 14:36:25 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,14 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
     _inputManager = std::make_unique<InputManager>(_window, _mode, optimalDistance, _parser->getBoundingBox());
     _textureLoader = std::make_unique<TextureLoader>();
     _uiManager = std::make_unique<UIManager>(_window);
+    _postProcessor = std::make_unique<PostProcessor>(1920, 1080);
 
     if (!_uiManager->initialize()) {
         std::cerr << "Failed to initialize UI\n";
     }
+
+    // Ensure model is properly centered on startup
+    _inputManager->resetView();
 
     setupUICallbacks();
 }
@@ -108,17 +112,6 @@ void App::run() {
         _inputManager->processInput();
         
         const auto& layout = _uiManager->getLayout();
-        float renderAreaWidth = layout.renderAreaSize.x - 16.0f;
-        float renderAreaHeight = layout.renderAreaSize.y - 16.0f;
-        float aspectRatio = renderAreaWidth / renderAreaHeight;
-        
-        _inputManager->setAspectRatio(aspectRatio);
-        
-        _inputManager->createMatrices();
-        
-        std::vector<glm::mat4> matrices = _inputManager->getMatrices();
-        
-        _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
         
         float windowPadding = 8.0f;
         float borderSize = 2.0f;
@@ -130,6 +123,17 @@ void App::run() {
         
         viewportWidth = std::max(viewportWidth, 1);
         viewportHeight = std::max(viewportHeight, 1);
+        
+        // Calculate aspect ratio using actual viewport dimensions
+        float aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
+        
+        _inputManager->setAspectRatio(aspectRatio);
+        
+        _inputManager->createMatrices();
+        
+        std::vector<glm::mat4> matrices = _inputManager->getMatrices();
+        
+        _renderer->setMatrices(matrices[0], matrices[1], matrices[2]);
         
         // DEBUG
         static bool firstRun = true;
@@ -146,8 +150,6 @@ void App::run() {
             
             firstRun = false;
         }
-        
-        glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 
         glm::vec4 viewportBounds(
             layout.renderAreaPos.x + windowPadding + borderSize,
@@ -157,10 +159,31 @@ void App::run() {
         );
         _inputManager->setViewportBounds(viewportBounds);
         
+        // Update PostProcessor size if needed
+        if (viewportWidth > 0 && viewportHeight > 0) {
+            static int lastWidth = 0, lastHeight = 0;
+            if (lastWidth != viewportWidth || lastHeight != viewportHeight) {
+                _postProcessor->resize(viewportWidth, viewportHeight);
+                lastWidth = viewportWidth;
+                lastHeight = viewportHeight;
+            }
+        }
+        
+        // Update time for CRT effect
+        _postProcessor->updateTime(currentFrame);
+        
+        // Bind PostProcessor framebuffer for off-screen 3D scene rendering
+        _postProcessor->bind();
+        
+        // Ensure proper OpenGL state for 3D rendering
         glDisable(GL_SCISSOR_TEST);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-
+        glDepthMask(GL_TRUE);
+        
+        // Disable face culling for now to debug face rendering issues
+        glDisable(GL_CULL_FACE);
+        
         setClearColor(Colors::BLACK_CHARCOAL_1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -185,9 +208,30 @@ void App::run() {
             _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices, _wireframeMode);
         }
         
-        glViewport(0, 0, 1920, 1080);
+        // Unbind framebuffer and return to default framebuffer
+        _postProcessor->unbind();
         
-        _uiManager->render();
+        // Clear the entire screen first (using full window viewport)
+        glViewport(0, 0, 1920, 1080);
+        setClearColor(Colors::BLACK_CHARCOAL_1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        // Set CRT mode on the post processor
+        _postProcessor->setEnableCRT(_uiManager->getState().enableCRT);
+        
+        // Set viewport to match the render area for correct aspect ratio
+        glViewport(viewportX, 1080 - viewportY - viewportHeight, viewportWidth, viewportHeight);
+        
+        // Disable depth testing and face culling for post-processing quad
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        
+        // Render the post-processed 3D scene to the viewport area
+        _postProcessor->render();
+        
+        // Now render UI on top of everything (reset to full viewport)
+        glViewport(0, 0, 1920, 1080);
+        _uiManager->render();        // No need to render UI again or reset viewport since it's already done
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
@@ -197,8 +241,9 @@ void App::run() {
 void App::renderWithMaterials() {
     const auto& materialGroups = _parser->getMaterialGroups();
     
-    setClearColor(Colors::BLACK_CHARCOAL_1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Don't clear here - clearing is already done in the main render loop
+    // setClearColor(Colors::BLACK_CHARCOAL_1);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& group : materialGroups) {
         if (group.indices.empty()) continue;
@@ -267,20 +312,20 @@ void App::renderWithMaterials() {
                 glUniform1i(useTextureLoc, 1);
             }
             
-            unsigned int materialIBO;
-            glGenBuffers(1, &materialIBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, materialIBO);
+            // Use optimized static buffer for material rendering
+            static unsigned int tempIBO = 0;
+            if (tempIBO == 0) {
+                glGenBuffers(1, &tempIBO);
+            }
+            
+            GLCall(glBindVertexArray(_mesh->getVAO()));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempIBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
                          group.indices.size() * sizeof(unsigned int), 
                          group.indices.data(), 
-                         GL_DYNAMIC_DRAW);
+                         GL_STREAM_DRAW);
             
-            GLCall(glBindVertexArray(_mesh->getVAO()));
             GLCall(glDrawElements(renderMode, static_cast<GLsizei>(group.indices.size()), GL_UNSIGNED_INT, nullptr));
-            
-            glDeleteBuffers(1, &materialIBO);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->getIBO());
         }
     }
     
@@ -327,6 +372,10 @@ void App::setupUICallbacks() {
         this->handleAutoRotationToggle(autoRotation);
     });
     
+    _inputManager->setCRTToggleCallback([this](bool enableCRT) {
+        this->handleCRTToggle(enableCRT);
+    });
+    
     _uiManager->onWireframeModeChanged = [this](bool wireframeMode) {
         this->handleWireframeToggle(wireframeMode);
     };
@@ -341,6 +390,14 @@ void App::setupUICallbacks() {
     
     _uiManager->onAutoRotationChanged = [this](bool autoRotation) {
         this->handleAutoRotationToggle(autoRotation);
+    };
+    
+    _uiManager->onCRTModeChanged = [this](bool enableCRT) {
+        this->handleCRTToggle(enableCRT);
+        // Also update InputManager state to keep them in sync
+        if (_inputManager) {
+            _inputManager->setEnableCRT(enableCRT);
+        }
     };
     
     _uiManager->onResetCamera = [this]() {
@@ -412,16 +469,18 @@ void App::handleAutoRotationToggle(bool autoRotation) {
     std::cout << "Auto-rotation " << (autoRotation ? "ON" : "OFF") << std::endl;
 }
 
-glm::mat4 App::createProjectionMatrix() {
-    float aspectRatio = (float)1920 / (float)1080;
+void App::handleCRTToggle(bool enableCRT) {
+    _enableCRT = enableCRT;
     
-    if (_useOrthographic) {
-        if (_mode == OBJ) {
-            return _inputManager->createOrthographicProjection(aspectRatio, 1.f);
-        } else {
-            return _inputManager->createOrthographicProjectionForFDF(aspectRatio, _parser->getRows(), _parser->getColumns(), 1.f);
-        }
-    } else {
-        return glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 1000.0f);
+    if (_postProcessor) {
+        _postProcessor->setEnableCRT(_enableCRT);
     }
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.enableCRT = _enableCRT;
+        _uiManager->updateState(currentState);
+    }
+    
+    std::cout << "CRT Effect " << (_enableCRT ? "ON" : "OFF") << std::endl;
 }

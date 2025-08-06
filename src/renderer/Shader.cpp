@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 10:24:58 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 14:23:03 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ unsigned int Shader::compileShader(unsigned int type, const std::string &source)
 	glShaderSource(id, 1, &src, nullptr);
 	glCompileShader(id);
 
-	//! Todo: expanded error handling
 	int result;
 	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 	if (result == GL_FALSE) {
@@ -112,6 +111,30 @@ void Shader::setUniform(const std::string& name, int value) {
         std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
     }
     glUniform1i(location, value);
+}
+
+void Shader::setUniform(const std::string& name, float value) {
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
+    }
+    glUniform1f(location, value);
+}
+
+void Shader::setUniform(const std::string& name, const glm::vec2& vector) {
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
+    }
+    glUniform2fv(location, 1, glm::value_ptr(vector));
+}
+
+void Shader::setUniform(const std::string& name, const glm::vec3& vector) {
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' not found!" << std::endl;
+    }
+    glUniform3fv(location, 1, glm::value_ptr(vector));
 }
 
 void Shader::setUniform(const std::string& name, const glm::mat4& matrix) {

@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 10:26:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:08:23 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,10 @@ void InputManager::setUseOrthographic(bool useOrtho) {
 
 void InputManager::setAutoRotation(bool autoRotation) {
     _autoRotation = autoRotation;
+}
+
+void InputManager::setEnableCRT(bool enableCRT) {
+    _enableCRT = enableCRT;
 }
 
 void InputManager::setProjectionToggleCallback(std::function<void(bool)> callback) {
@@ -242,6 +246,14 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
         }
     }
 
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+        _enableCRT = !_enableCRT;
+        
+        if (_onCRTToggle) {
+            _onCRTToggle(_enableCRT);
+        }
+    }
+
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
         resetView();
     }
@@ -255,18 +267,22 @@ void InputManager::setAutoRotationToggleCallback(std::function<void(bool)> callb
     _onAutoRotationToggle = callback;
 }
 
+void InputManager::setCRTToggleCallback(std::function<void(bool)> callback) {
+    _onCRTToggle = callback;
+}
+
 void InputManager::calculateOptimalCameraPosition() {
     float boundingBoxDiagonal = _boundingBox.getDiagonal();
     float distance = boundingBoxDiagonal * 1.5f;
     
-    glm::vec3 modelCenter = _boundingBox.getCenter();
-    _fixedCameraPos = modelCenter + glm::vec3(0.0f, 0.0f, distance);
-    _fixedCameraTarget = modelCenter;
+    _fixedCameraPos = glm::vec3(0.0f, 0.0f, distance);
+    _fixedCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     _fixedCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void InputManager::resetModelTransform() {
-    _modelOffset = glm::vec3(0.0f);
+    glm::vec3 modelCenter = _boundingBox.getCenter();
+    _modelOffset = -modelCenter;
     _modelRotation = glm::vec3(0.0f);
 }
 

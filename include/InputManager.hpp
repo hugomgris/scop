@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 17:31:50 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:07:29 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,10 @@
 # include "glm/gtc/matrix_transform.hpp"
 # include "glm/gtc/type_ptr.hpp"
 
-// Mouse interaction modes for model manipulation
 enum class MouseInteraction {
     None,
-    PanModel,      // Left click + drag to move model
-    RotateModel    // Right click + drag to rotate model
+    PanModel,
+    RotateModel
 };
 
 class InputManager {
@@ -72,10 +71,12 @@ class InputManager {
 		std::function<void(bool)> _onWireframeToggle;
 		std::function<void(bool)> _onVertexToggle;
 		std::function<void(bool)> _onAutoRotationToggle;
+		std::function<void(bool)> _onCRTToggle;
 		
 		bool _useOrthographic = false;
 		bool _wireframeMode = false;
 		bool _showVertices = false;
+		bool _enableCRT = false;
 		
 		// Dynamic aspect ratio for UI rendering
 		float _aspectRatio = 1920.0f / 1080.0f;
@@ -95,6 +96,7 @@ class InputManager {
 		void setViewportBounds(const glm::vec4& bounds);
 		void setUseOrthographic(bool useOrtho);
 		void setAutoRotation(bool autoRotation);
+		void setEnableCRT(bool enableCRT);
 		void setModelRotation(float x, float y);
 
 		void processInput();
@@ -123,6 +125,7 @@ class InputManager {
 		void setWireframeToggleCallback(std::function<void(bool)> callback);
 		void setVertexToggleCallback(std::function<void(bool)> callback);
 		void setAutoRotationToggleCallback(std::function<void(bool)> callback);
+		void setCRTToggleCallback(std::function<void(bool)> callback);
 		
 		// Getters for current state
 		bool isUsingOrthographic() const { return _useOrthographic; }
