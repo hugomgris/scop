@@ -587,7 +587,7 @@ OUTPUT LAYER:
 
 ## License
 
-MIT
+This project is part of the 42 School curriculum. Educational use only.
 
 ## Acknowledgments
 
