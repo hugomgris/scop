@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 17:31:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 10:26:04 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos) 
     _lastMouseY = ypos;
     
     if (_mouseInteraction == MouseInteraction::PanModel) {
-        float sensitivity = 0.005f;
+        float sensitivity = 0.02f;
         _modelOffset.x += xoffset * sensitivity;
         _modelOffset.y += yoffset * sensitivity;
     } else if (_mouseInteraction == MouseInteraction::RotateModel) {

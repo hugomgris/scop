@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 17:52:39 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 12:47:50 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ struct UILayout {
     float leftPanelWidth = 350.0f;
     float windowWidth = 1920.0f;
     float windowHeight = 1080.0f;
-    float panelPadding = 10.0f;
+    float panelPadding = 15.0f;
     ImVec2 renderAreaPos{};
     ImVec2 renderAreaSize{};
 };
@@ -58,6 +58,8 @@ private:
     GLFWwindow* _window;
     UIState _state;
     UILayout _layout;
+    ImFont *_boldFont;
+    ImFont *_regularFont;
     
     // Style colors
     ImVec4 _backgroundColor{0.1f, 0.1f, 0.1f, 1.0f};
@@ -65,8 +67,8 @@ private:
     ImVec4 _borderColor{0.9f, 0.9f, 0.9f, 1.0f};
     ImVec4 _textColor{0.9f, 0.9f, 0.9f, 1.0f};
     ImVec4 _buttonColor{0.2f, 0.2f, 0.2f, 1.0f};
-    ImVec4 _buttonHoveredColor{0.3f, 0.3f, 0.3f, 1.0f};
-    ImVec4 _buttonActiveColor{0.4f, 0.4f, 0.4f, 1.0f};
+    ImVec4 _buttonHoveredColor{0.4f, 0.4f, 0.4f, 1.0f};
+    ImVec4 _buttonActiveColor{0.9f, 0.9f, 0.9f, 1.0f};
     
     void setupStyle();
     void renderControlPanel();
@@ -80,6 +82,8 @@ private:
                               float headerHeight, ImU32 headerColor, ImU32 textColor);
     void renderStyledSection(const char* title, std::function<void()> contentCallback);
     void renderMeshInfoStyled();
+    bool renderCustomCollapsingHeader(const char* label, ImGuiTreeNodeFlags flags = 0);
+    bool renderCustomButton(const char* label);
 
 public:
     UIManager(GLFWwindow* window);

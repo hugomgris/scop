@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 18:17:16 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 12:51:50 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <map>
 
 UIManager::UIManager(GLFWwindow* window) : _window(window) {
     int width, height;
@@ -37,6 +38,14 @@ bool UIManager::initialize() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+
+    io.Fonts->AddFontDefault();
+    ImFont *boldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/jetBrainsMono/JetBrainsMonoNL-ExtraBold.ttf", 24.0f);
+    ImFont *regularFont = io.Fonts->AddFontFromFileTTF("resources/fonts/jetBrainsMono/JetBrainsMono-Light.ttf", 18.0f);
+    _boldFont = boldFont;
+    _regularFont = regularFont;
+    
     
     setupStyle();
     
@@ -70,6 +79,13 @@ void UIManager::setupStyle() {
     style.Colors[ImGuiCol_CheckMark] = _borderColor;
     style.Colors[ImGuiCol_SliderGrab] = _borderColor;
     style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = _panelColor;
+    style.Colors[ImGuiCol_MenuBarBg] = _panelColor;
+    style.Colors[ImGuiCol_Header] = _panelColor;
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(_panelColor.x + 0.05f, _panelColor.y + 0.05f, _panelColor.z + 0.05f, 1.0f);
+    style.Colors[ImGuiCol_HeaderActive] = _borderColor;
+    
+    style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.9f, 0.9f, 0.9f, 1.0f); 
     
     // Style
     style.WindowRounding = 0.0f;
@@ -79,10 +95,10 @@ void UIManager::setupStyle() {
     style.PopupRounding = 0.0f;
     style.ScrollbarRounding = 0.0f;
     style.TabRounding = 0.0f;
-    style.WindowBorderSize = 2.0f;
+    style.WindowBorderSize = 5.0f;
     style.ChildBorderSize = 1.0f;
     style.PopupBorderSize = 1.0f;
-    style.FrameBorderSize = 1.0f;
+    style.FrameBorderSize = 0.0f;
     style.TabBorderSize = 0.0f;
 }
 
@@ -124,22 +140,22 @@ void UIManager::renderControlPanel() {
     ImGui::Begin("Control Panel", nullptr, window_flags);
     
     float headerHeight = 35.0f;
-    ImU32 headerColor = IM_COL32(70, 130, 180, 255);
-    ImU32 textColor = IM_COL32(255, 255, 255, 255);
+    ImU32 headerColor = IM_COL32(229, 229, 217, 255);
+    ImU32 textColor = IM_COL32(31, 31, 33, 255);
     
-    drawCustomFrameHeader("SCOP Control Panel", panelPos, _layout.leftPanelWidth, 
+    drawCustomFrameHeader("CONTROL PANEL", panelPos, _layout.leftPanelWidth, 
                          headerHeight, headerColor, textColor);
     
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerHeight + 10.0f);
     
     renderMeshInfo();
-    ImGui::Separator();
+    ImGui::Spacing();
     
     renderRenderingControls();
-    ImGui::Separator();
+    ImGui::Spacing();
     
     renderModelControls();
-    ImGui::Separator();
+    ImGui::Spacing();
     
     renderPerformanceStats();
     
@@ -147,17 +163,33 @@ void UIManager::renderControlPanel() {
 }
 
 void UIManager::renderMeshInfo() {
-    if (ImGui::CollapsingHeader("Mesh Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (renderCustomCollapsingHeader("Mesh Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (_regularFont) {
+            ImGui::PushFont(_regularFont);
+        }
+        
         ImGui::Text("File: %s", _state.currentFile.c_str());
         ImGui::Text("Vertices: %d", _state.vertexCount);
         ImGui::Text("Indices: %d", _state.indexCount);
         ImGui::Text("Triangles: %d", _state.triangleCount);
         ImGui::Text("Materials: %d", _state.materialCount);
+        
+        if (_regularFont) {
+            ImGui::PopFont();
+        }
+        
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
     }
 }
 
 void UIManager::renderRenderingControls() {
-    if (ImGui::CollapsingHeader("Rendering Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (renderCustomCollapsingHeader("Rendering Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (_regularFont) {
+            ImGui::PushFont(_regularFont);
+        }
         
         bool wireframe = _state.wireframeMode;
         if (ImGui::Checkbox("Wireframe Mode [V]", &wireframe)) {
@@ -190,36 +222,71 @@ void UIManager::renderRenderingControls() {
                 onAutoRotationChanged(autoRot);
             }
         }
+
+        if (_regularFont) {
+            ImGui::PopFont();
+        }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
     }
 }
 
 void UIManager::renderModelControls() {
-    if (ImGui::CollapsingHeader("Model Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (renderCustomCollapsingHeader("Model Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (_regularFont) {
+            ImGui::PushFont(_regularFont);
+        }
+        
         ImGui::Text("Position: (%.2f, %.2f, %.2f)", 
                    _state.cameraPosition.x, 
                    _state.cameraPosition.y, 
                    _state.cameraPosition.z);
         
-        if (ImGui::Button("Reset Model [R]")) {
+        if (_regularFont) {
+            ImGui::PopFont();
+        }
+        
+        if (renderCustomButton("Reset Model [R]")) {
             if (onResetCamera) {
                 onResetCamera();
             }
+        }
+        
+        if (_regularFont) {
+            ImGui::PushFont(_regularFont);
         }
         
         ImGui::Text("\nInteraction Controls:");
         ImGui::Text("Left-click + drag - Pan model");
         ImGui::Text("Right-click + drag - Rotate model");
         ImGui::Text("Scroll wheel - Zoom in/out");
-        ImGui::Text("\nFixed Camera System:");
-        ImGui::Text("Camera position optimized for");
-        ImGui::Text("best model viewing automatically");
+
+        if (_regularFont) {
+            ImGui::PopFont();
+        }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
     }
 }
 
 void UIManager::renderPerformanceStats() {
-    if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (renderCustomCollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (_regularFont) {
+            ImGui::PushFont(_regularFont);
+        }
+        
         ImGui::Text("FPS: %.1f", _state.fps);
         ImGui::Text("Frame Time: %.3f ms", _state.frameTime * 1000.0f);
+        
+        if (_regularFont) {
+            ImGui::PopFont();
+        }
         
         static float fps_history[100] = {};
         static int fps_history_offset = 0;
@@ -250,25 +317,26 @@ void UIManager::renderMainViewport() {
     ImU32 textColor = IM_COL32(31, 31, 33, 255);
     
     ImVec2 headerStartPos = ImGui::GetCursorScreenPos();
+    headerStartPos.x += 7.0f;
     ImVec2 availableRegion = ImGui::GetContentRegionAvail();
     
     ImGui::InvisibleButton("##header_space", ImVec2(availableRegion.x, headerHeight - 5));
     
-    drawCustomFrameHeader("VIEWPORT", headerStartPos, availableRegion.x, 
+    drawCustomFrameHeader("VIEWPORT", headerStartPos, availableRegion.x - 7.0f, 
                          headerHeight, headerColor, textColor);
-
-    //ImGui::Spacing();
 
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
     ImVec2 canvas_size = ImGui::GetContentRegionAvail();
     
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-    draw_list->AddRect(canvas_pos, 
-                      ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), 
-                      IM_COL32(230, 230, 230, 255),
-                      0.0f, 0, 2.0f);
-    
+    ImVec2 border_start = ImVec2(canvas_pos.x + 9.0f, canvas_pos.y);
+    ImVec2 border_end = ImVec2(canvas_pos.x + canvas_size.x - 1.0f, canvas_pos.y + canvas_size.y - 5.0f);
+
+    draw_list->AddRect(border_start, border_end, 
+                    IM_COL32(230, 230, 230, 255),
+                    0.0f, 0, 5.0f);
+        
     ImGui::End();
 }
 
@@ -306,7 +374,7 @@ void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float 
                                      float headerHeight, ImU32 headerColor, ImU32 textColor) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     
-    ImVec2 headerMin = framePos;
+    ImVec2 headerMin = ImVec2(framePos.x, framePos.y - 2);
     ImVec2 headerMax = ImVec2(framePos.x + frameWidth, framePos.y + headerHeight);
     draw_list->AddRectFilled(headerMin, headerMax, headerColor);
     
@@ -314,6 +382,10 @@ void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float 
     draw_list->AddLine(ImVec2(headerMin.x, headerMin.y), ImVec2(headerMin.x, headerMax.y), IM_COL32(229, 229, 217, 255), 1.0f);  
     draw_list->AddLine(ImVec2(headerMax.x, headerMin.y), ImVec2(headerMax.x, headerMax.y), IM_COL32(229, 229, 217, 255), 1.0f);
     
+    if (_boldFont) {
+        ImGui::PushFont(_boldFont);
+    }
+
     ImVec2 textSize = ImGui::CalcTextSize(title);
     ImVec2 textPos = ImVec2(
         framePos.x + (frameWidth - textSize.x) * 0.5f,
@@ -321,4 +393,92 @@ void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float 
     );
     
     draw_list->AddText(textPos, textColor, title);
+    
+    if (_boldFont) {
+        ImGui::PopFont();
+    }
+}
+
+bool UIManager::renderCustomCollapsingHeader(const char* label, ImGuiTreeNodeFlags flags) {
+    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+    ImVec2 size = ImVec2(_layout.leftPanelWidth - (_layout.panelPadding * 2) + 15.0f, ImGui::GetTextLineHeightWithSpacing() + 14.0f);
+    
+    ImVec2 mousePos = ImGui::GetMousePos();
+    bool isHovered = (mousePos.x >= cursorPos.x && mousePos.x <= cursorPos.x + size.x &&
+                     mousePos.y >= cursorPos.y && mousePos.y <= cursorPos.y + size.y);
+    
+    bool isClicked = isHovered && ImGui::IsMouseDown(0);
+
+    ImVec4 textColor;
+    if (isClicked) {
+        textColor = ImVec4(_panelColor.x, _panelColor.y, _panelColor.z, 1.0f);
+    } else {
+        textColor = _textColor;
+    }
+
+    if (_boldFont) {
+        ImGui::PushFont(_boldFont);
+    }
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+    bool result = ImGui::CollapsingHeader(label, flags);
+    ImGui::PopStyleColor();
+    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 headerMin = ImVec2(cursorPos.x, cursorPos.y);
+    ImVec2 headerMax = ImVec2(cursorPos.x + size.x, cursorPos.y + size.y);
+    
+    ImU32 borderColor = IM_COL32(
+        static_cast<int>(_borderColor.x * 255),
+        static_cast<int>(_borderColor.y * 255),
+        static_cast<int>(_borderColor.z * 255),
+        255
+    );
+    
+    draw_list->AddRect(headerMin, headerMax, borderColor, 0.0f, 0, 2.0f);
+
+    if (_boldFont) {
+        ImGui::PopFont();
+    }
+    
+    return result;
+}
+
+bool UIManager::renderCustomButton(const char* label) {
+    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+    ImVec2 buttonSize = ImGui::CalcTextSize(label);
+    buttonSize.x += ImGui::GetStyle().FramePadding.x * 2.0f;
+    buttonSize.y += ImGui::GetStyle().FramePadding.y * 2.0f;
+    
+    ImVec2 mousePos = ImGui::GetMousePos();
+    bool isHovered = (mousePos.x >= cursorPos.x && mousePos.x <= cursorPos.x + buttonSize.x &&
+                     mousePos.y >= cursorPos.y && mousePos.y <= cursorPos.y + buttonSize.y);
+    
+    bool isClicked = isHovered && ImGui::IsMouseDown(0);
+
+    ImVec4 textColor;
+    if (isClicked) {
+        textColor = ImVec4(_panelColor.x, _panelColor.y, _panelColor.z, 1.0f);
+    } else {
+        textColor = _textColor;
+    }
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+    bool result = ImGui::Button(label);
+    ImGui::PopStyleColor();
+    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 buttonMin = ImVec2(cursorPos.x, cursorPos.y);
+    ImVec2 buttonMax = ImVec2(cursorPos.x + buttonSize.x, cursorPos.y + buttonSize.y + 2.0f);
+    
+    ImU32 borderColor = IM_COL32(
+        static_cast<int>(_borderColor.x * 255),
+        static_cast<int>(_borderColor.y * 255),
+        static_cast<int>(_borderColor.z * 255),
+        255
+    );
+    
+    draw_list->AddRect(buttonMin, buttonMax, borderColor, 0.0f, 0, 2.0f);
+    
+    return result;
 }
