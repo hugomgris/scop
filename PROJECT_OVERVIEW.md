@@ -92,4 +92,36 @@ make list-models
 ./scop resources/objects/mariohead.obj
 ```
 
-## Detailed Features
+## Features
+
+### Core Functionality
+- **OBJ File Parsing**: Complete support for .obj files with materials (.mtl).
+- **FDF File Parsing**: Complete support for .fdf files, translating 2D maps into vertex arrays.
+- **OpenGL Rendering**: Modern OpenGL with programmable shaders.
+- **Multiple Render Modes**: Solid, wireframe, line, and point visualization.
+- **Material & Texture Support**: Full material parsing and texture loading.
+- **Interactive viewport**: Mouse controls for model interaction.
+- **Real-time Toggles**: Switch between rendering modes, projections, filters and animations in real time.
+
+### Rendering Modes
+- **Solid Mode**: Full 3D rendering with lighting and textures.
+- **Wireframe Mode**: Complete triangle edge visualization.
+- **Line Mode**: Original FDF-style line rendering.
+- **Vertex Mode**: Point cloud visualization.
+
+## Controls
+
+| Key | Action |
+|-----|--------|
+| `LMB` | Move the model around the viewport |
+| `RMB` | Freely rotate the model around all its axes |
+| `Scroll` | Zoom in/out |
+| `V` | Toggle wireframe mode |
+| `X` | Toggle vertex visualization |
+| `P` | Toggle orthographic/perspective projection |
+| `R` | Reset model to default position |
+| `C` | Toggle CRT filter (post-processing) |
+| `1` | Toggle auto-rotation |
+| `Esc` | Exit application |
+
+---
