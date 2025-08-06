@@ -263,6 +263,8 @@ This ensures full control over edge visibility and appearance, allowing manual t
 
 (Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
 
+![Snake, we're not tools of the Government, or anyone else](img/screenshot_03.png)
+
 ## Shader Programming: Talking With the GPU and *Understanding Each Other*
 
 Shaders execute on the GPU, enabling efficient parallel processing:
