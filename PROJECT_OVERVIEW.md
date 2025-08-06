@@ -149,7 +149,7 @@ The SCOP rendering pipeline follows a systematic flow from file input to final f
           ▲                        ▲          └─────────────────┘
           │                        │                    │
           └────────┬───────────────┘                    ▼
-                   │                            ┌─────────────────┐
+                   │                           ┌─────────────────┐
              ┌─────────────────┐               │  Shader Program │
              │ Input Manager   │◀──────────────│   Compilation   │
              │ (Mouse/Keyboard)│               │   & Linking     │
