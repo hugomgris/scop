@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:08:23 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:19:28 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yo
     }
     
     if (_useOrthographic) {
-        _zoomLevel += (float)yoffset * 0.1f;
+        _zoomLevel -= (float)yoffset * 0.1f;
         if (_zoomLevel < 0.1f) _zoomLevel = 0.1f;
         if (_zoomLevel > 5.0f) _zoomLevel = 5.0f;
     } else {
@@ -211,10 +211,12 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
     }
     
     if (key == GLFW_KEY_V && action == GLFW_PRESS) {
-        _wireframeMode = !_wireframeMode;
+        if (_mode != FDF) {
+            _wireframeMode = !_wireframeMode;
         
-        if (_onWireframeToggle) {
-            _onWireframeToggle(_wireframeMode);
+            if (_onWireframeToggle) {
+                _onWireframeToggle(_wireframeMode);
+            }
         }
     }
 
@@ -306,7 +308,7 @@ void InputManager::createMatrices() {
     glm::mat4 projection;
     if (_useOrthographic) {
         if (_mode == FDF) {
-            projection = createOrthographicProjectionForFDF(_aspectRatio, 110, 190, 10.f * _zoomLevel);
+            projection = createOrthographicProjectionForFDF(_aspectRatio, 19, 11, 1.5f * _zoomLevel);
         } else {
             projection = createOrthographicProjection(_aspectRatio, _zoomLevel);
         }
@@ -344,7 +346,7 @@ glm::mat4 InputManager::createOrthographicProjectionForFDF(float aspectRatio, in
     float orthoWidth = orthoSize * aspectRatio;
     float orthoHeight = orthoSize;
     
-    return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, -50.0f, 50.0f);
+    return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, -50.0f, 100.0f);
 }
 
 void InputManager::resetView() {
