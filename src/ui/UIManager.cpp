@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:26:42 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,12 +325,12 @@ void UIManager::renderMainViewport() {
     ImU32 textColor = IM_COL32(31, 31, 33, 255);
     
     ImVec2 headerStartPos = ImGui::GetCursorScreenPos();
-    headerStartPos.x += 7.0f;
+    headerStartPos.x += 1.0f;
     ImVec2 availableRegion = ImGui::GetContentRegionAvail();
     
     ImGui::InvisibleButton("##header_space", ImVec2(availableRegion.x, headerHeight - 5));
     
-    drawCustomFrameHeader("VIEWPORT", headerStartPos, availableRegion.x - 7.0f, 
+    drawCustomFrameHeader("VIEWPORT", headerStartPos, availableRegion.x - 1.0f, 
                          headerHeight, headerColor, textColor);
 
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
@@ -338,7 +338,7 @@ void UIManager::renderMainViewport() {
     
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-    ImVec2 border_start = ImVec2(canvas_pos.x + 9.0f, canvas_pos.y);
+    ImVec2 border_start = ImVec2(canvas_pos.x + 3.0f, canvas_pos.y);
     ImVec2 border_end = ImVec2(canvas_pos.x + canvas_size.x - 1.0f, canvas_pos.y + canvas_size.y - 5.0f);
 
     draw_list->AddRect(border_start, border_end, 
