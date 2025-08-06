@@ -235,7 +235,7 @@ By using indices, EBOs reduce memory usage and increase rendering efficiency. Fo
 `EBO` → Instructions on which bricks to use and in what order (indices to assemble triangles, lines, etc.) [How to ***use*** the vertices to form primitives]
 
 
-## Advanced Wireframe Implementation 🕸️
+## Advanced Wireframe Implementation
 
 A custom wireframe system addresses limitations in OpenGL’s native wireframe mode:
 
@@ -245,9 +245,11 @@ A custom wireframe system addresses limitations in OpenGL’s native wireframe m
 - Inability to combine with filled rendering  
 - Limited visual control
 
+(In other words, with `glPolygonMode` you're most likely going to lose edges/lines when trying to render the wireframe visualization of your parsed model, specially if it's a slightly complex one (i.e., not a cube))
+
 ### Custom Wireframe Solution
 
-SCOP generates explicit line segments for each edge in the mesh:
+Instead of relaying in the built-in polygon outline methods, the custom wireframe pipeline breaks triangles into explicit line segments for each edge in the mesh:
 
 ```cpp
 for (size_t i = 0; i < triangleIndices.size(); i += 3) {
@@ -255,7 +257,7 @@ for (size_t i = 0; i < triangleIndices.size(); i += 3) {
 }
 ```
 
-This ensures full control over edge visibility and appearance.
+This ensures full control over edge visibility and appearance, allowing manual tweaking of line width, color and overall general presentation. (What I mean with this is that it's not only better, but *cooler*; check the `resources/objects/ninja/Ninja.obj` rendering and toggle the CRT effect and Wireframe mode on and be transported to a retro futuristic realm of *awesome* graphics) (Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
 
 ## Shader Programming: The GPU Workhorses 🎨
 
