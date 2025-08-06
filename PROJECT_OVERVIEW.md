@@ -228,9 +228,9 @@ By using indices, EBOs reduce memory usage and increase rendering efficiency. Fo
 
 ### The Simplest Way to Understand VAO/VBO/EBO Roles I Can Come Up With
 
-`VBO` → A box of Lego bricks (vertex data) [The raw float values]
-`VAO` → Blueprints for how to use those bricks (how to interpret the bytes in the VBO) [Structure of a single vertex]
-`EBO` → Instructions on which bricks to use and in what order (indices to assemble triangles, lines, etc.) [Which vertices to use and in what order to form primitives]
+`VBO` → A box of Lego bricks (vertex data) [The raw float values];
+`VAO` → Blueprints for how to use those bricks (how to interpret the bytes in the VBO) [Structure of a single vertex];
+`EBO` → Instructions on which bricks to use and in what order (indices to assemble triangles, lines, etc.) [Which vertices to use and in what order to form primitives];
 
 ## Advanced Wireframe Implementation 🕸️
 
