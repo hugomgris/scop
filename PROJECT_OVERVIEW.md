@@ -267,11 +267,13 @@ This ensures full control over edge visibility and appearance, allowing manual t
 
 ## Shader Programming: Talking With the GPU and *Understanding Each Other*
 
-Shaders execute on the GPU, enabling efficient parallel processing:
+Shaders execute on the GPU, enabling efficient parallel processing. They can basically be understood as pieces of source code sent to the GPU's side of the fence so that it can draw the data in specific ways. Shader types are extensive, but there are two main categories that are necessary for any visualization.
 
 ### Vertex Shaders
 
-Transformations are applied to convert world coordinates into screen space:
+Vertex shaders are used to map vertices in the 3D space inside the GPU's mind. If, for example, the .obj raw data defines a basic cube, with a specific distance between vertices, these shaders are used (via OpenGL uniforms) to build the vertex model that will be used to build the 3D representation.
+
+In essence, transformations are applied to convert world coordinates into screen space:
 
 ```glsl
 gl_Position = projection * view * model * vec4(aPos, 1.0);
@@ -279,6 +281,8 @@ gl_Position = projection * view * model * vec4(aPos, 1.0);
 ```
 
 ### Fragment Shaders
+
+Fragment Shaders are in charge of "coloring" the model. Following the cube example, the overall shape's layout is formed by triangles (remember: VBO->VAO->EBO), and those triangles need to be rasterized in screen space in some way, be that using pre-defined flat colors or texture-based materials (.obj<->.mtl). This project's implementation has a couple shaders, one for the rendering of the faces itself (calculating base color, light affectations, specular influence, etc), and one for the post-processing CRT effect (lens deformation, chromatic aberration, scanlines, etc). 
 
 Color and lighting are computed per-pixel, typically using the Phong reflection model:
 
@@ -288,17 +292,19 @@ vec3 result = (ambient + diffuse) * texture(u_texture, TexCoord).rgb;
 
 This technique yields smooth shading and material-specific lighting.
 
-## Multi-Texture Material System 🎭
+### Multi-Texture Material System 🎭
 
-SCOP supports rendering of models with multiple materials through grouped draw calls:
+This SCOP supports rendering of models with multiple materials through grouped draw calls. If an object has more than one material/texture those are pre-processed and stored in memory, so that the drawing process can loop through the different materials (tied to faces by the .obj layout; caught by the parsing):
 
 ```cpp
-for (const auto& materialGroup : materialGroups) {
+for (const auto &materialGroup : materialGroups) {
     ...
 }
 ```
 
 Grouping faces by material minimizes expensive state changes such as texture binding.
+
+(It also allows this implementation to render Mario's head like it was 1997 and we were playing with our flamming hot Nintendo 64).
 
 ## UI Integration 🖥️
 
