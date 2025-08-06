@@ -263,7 +263,7 @@ This ensures full control over edge visibility and appearance, allowing manual t
 
 (Shout-out to Grayfox, Death's prisioner and undying shadow in the world of lights).
 
-## Shader Programming: The GPU Workhorses 🎨
+## Shader Programming: Talking With the GPU and *Understanding Each Other*
 
 Shaders execute on the GPU, enabling efficient parallel processing:
 
