@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 16:00:28 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:40:23 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,20 @@ UIManager::~UIManager() {
     shutdown();
 }
 
+/**
+ * Initialize UI System - Sets up ImGui with fonts and styling
+ * 
+ * FLOW:
+ * 1. Initialize ImGui context and configure flags
+ * 2. Load custom fonts from JetBrains Mono family:
+ *    - Bold font for headers and emphasis
+ *    - Regular light font for body text
+ * 3. Apply custom dark theme styling
+ * 4. Initialize ImGui backends:
+ *    - GLFW backend for window/input integration
+ *    - OpenGL3 backend for rendering
+ * 5. Return initialization success status
+ */
 bool UIManager::initialize() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -102,6 +116,19 @@ void UIManager::setupStyle() {
     style.TabBorderSize = 0.0f;
 }
 
+/**
+ * New Frame Setup - Prepares UI for new frame rendering
+ * 
+ * FLOW:
+ * 1. Initialize ImGui frame for OpenGL and GLFW backends
+ * 2. Begin new ImGui frame context
+ * 3. Query current window dimensions from GLFW
+ * 4. Update layout calculations:
+ *    - Recalculate render area position and size
+ *    - Account for left panel width and padding
+ *    - Adjust for viewport positioning offsets
+ * 5. Prepare responsive layout for current window size
+ */
 void UIManager::newFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -314,6 +341,25 @@ void UIManager::renderPerformanceStats() {
     }
 }
 
+    );
+}
+
+/**
+ * Render Main Viewport - Creates 3D rendering area with custom styling
+ * 
+ * FLOW:
+ * 1. Position viewport window in calculated render area
+ * 2. Configure window flags for viewport behavior:
+ *    - Disable resize, move, collapse, scrolling
+ *    - Remove title bar and background for clean appearance
+ * 3. Create custom header with "VIEWPORT" title:
+ *    - Draw header background with accent color
+ *    - Center title text using bold font
+ * 4. Define canvas area for 3D content:
+ *    - Calculate available region after header
+ *    - Draw viewport border frame
+ * 5. Provide visual separation between UI and 3D content
+ */
 void UIManager::renderMainViewport() {
     ImVec2 viewportPos = _layout.renderAreaPos;
     ImVec2 viewportSize = _layout.renderAreaSize;
@@ -386,6 +432,19 @@ void UIManager::setCurrentFile(const std::string& filename) {
     _state.currentFile = filename;
 }
 
+/**
+ * Draw Custom Frame Header - Renders styled header with background and text
+ * 
+ * FLOW:
+ * 1. Get ImGui draw list for custom drawing operations
+ * 2. Calculate header rectangle dimensions and position
+ * 3. Draw header background with specified color
+ * 4. Add border lines for visual definition:
+ *    - Top, left, and right borders for frame appearance
+ * 5. Calculate centered text position within header
+ * 6. Render title text with bold font and specified color
+ * 7. Manage font stack properly (push/pop bold font)
+ */
 void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float frameWidth, 
                                      float headerHeight, ImU32 headerColor, ImU32 textColor) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -415,6 +474,22 @@ void UIManager::drawCustomFrameHeader(const char* title, ImVec2 framePos, float 
     }
 }
 
+/**
+ * Render Custom Collapsing Header - Creates styled expandable section headers
+ * 
+ * FLOW:
+ * 1. Calculate header dimensions and mouse interaction area
+ * 2. Detect mouse hover and click states for interactive feedback
+ * 3. Apply dynamic text color based on interaction state:
+ *    - Clicked: Panel background color for contrast
+ *    - Normal: Standard text color
+ * 4. Render ImGui collapsing header with bold font
+ * 5. Draw custom border rectangle around header:
+ *    - Use border color for visual consistency
+ *    - 2-pixel border width for clear definition
+ * 6. Manage font stack for typography consistency
+ * 7. Return expansion state for content rendering
+ */
 bool UIManager::renderCustomCollapsingHeader(const char* label, ImGuiTreeNodeFlags flags) {
     ImVec2 cursorPos = ImGui::GetCursorScreenPos();
     ImVec2 size = ImVec2(_layout.leftPanelWidth - (_layout.panelPadding * 2) + 15.0f, ImGui::GetTextLineHeightWithSpacing() + 14.0f);
@@ -460,6 +535,21 @@ bool UIManager::renderCustomCollapsingHeader(const char* label, ImGuiTreeNodeFla
     return result;
 }
 
+/**
+ * Render Custom Button - Creates styled button with interaction feedback
+ * 
+ * FLOW:
+ * 1. Calculate button dimensions from text size and padding
+ * 2. Detect mouse hover and click states for visual feedback
+ * 3. Apply dynamic text color based on interaction:
+ *    - Clicked: Panel background color for pressed state
+ *    - Normal: Standard text color
+ * 4. Render ImGui button with custom text styling
+ * 5. Draw custom border rectangle around button:
+ *    - Use consistent border color and 2-pixel width
+ *    - Slightly extend button height for visual balance
+ * 6. Return button press state for action handling
+ */
 bool UIManager::renderCustomButton(const char* label) {
     ImVec2 cursorPos = ImGui::GetCursorScreenPos();
     ImVec2 buttonSize = ImGui::CalcTextSize(label);

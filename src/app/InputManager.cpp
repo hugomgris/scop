@@ -6,12 +6,24 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 16:00:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:25:47 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/InputManager.hpp"
 
+/**
+ * InputManager Constructor - Sets up input handling and camera system
+ * 
+ * FLOW:
+ * 1. Initialize member variables with default values
+ * 2. Set up GLFW callback system using wrapper functions
+ * 3. Configure cursor mode for normal interaction
+ * 4. Calculate optimal camera position based on model bounding box
+ * 
+ * The constructor establishes the complete input handling pipeline,
+ * connecting GLFW events to class methods via static wrapper functions.
+ */
 InputManager::InputManager(GLFWwindow *window, int mode, float optimalDistance, const BoundingBox &boundingBox): 
     _window(window), _mode(mode), _boundingBox(boundingBox),
     _deltaTime(0.0f), _lastFrame(0.0f), _mouseInteraction(MouseInteraction::None),
@@ -21,11 +33,11 @@ InputManager::InputManager(GLFWwindow *window, int mode, float optimalDistance, 
     _defaultDistance(optimalDistance) {
     
     glfwSetWindowUserPointer(window, this);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback_wrapper);
-    glfwSetCursorPosCallback(window, mouse_callback_wrapper);
-    glfwSetScrollCallback(window, scroll_callback_wrapper);
-    glfwSetKeyCallback(window, key_callback_wrapper);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallbackWrapper);
+    glfwSetCursorPosCallback(window, mouseCallbackWrapper);
+    glfwSetScrollCallback(window, scrollCallbackWrapper);
+    glfwSetKeyCallback(window, keyCallbackWrapper);
     
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     
@@ -96,17 +108,31 @@ void InputManager::setModelRotation(float x, float y) {
     _modelRotation.y = y;
 }
 
-void InputManager::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void InputManager::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 	(void)window;
 	glViewport(0, 0, width, height);
 }
 
-void InputManager::mouse_button_callback_wrapper(GLFWwindow* window, int button, int action, int mods) {
+void InputManager::mouseButtonCallbackWrapper(GLFWwindow* window, int button, int action, int mods) {
     InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-    inputManager->mouse_button_callback(window, button, action, mods);
+    inputManager->mouseButtonCallback(window, button, action, mods);
 }
 
-void InputManager::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+/**
+ * Mouse Button Callback - Handles mouse press/release events for 3D interaction
+ * 
+ * FLOW:
+ * 1. Get current cursor position from GLFW
+ * 2. Check if cursor is within the 3D viewport bounds
+ * 3. On press: Store initial position and set interaction mode
+ * 4. On release: Clear interaction mode
+ * 
+ * Interaction modes:
+ * - Left click: Pan model (translate)
+ * - Right click: Rotate model
+ * - Outside viewport: Ignore interaction
+ */
+void InputManager::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     (void)mods;
 
     double xpos, ypos;
@@ -132,12 +158,24 @@ void InputManager::mouse_button_callback(GLFWwindow* window, int button, int act
     }
 }
 
-void InputManager::mouse_callback_wrapper(GLFWwindow* window, double xpos, double ypos) {
+void InputManager::mouseCallbackWrapper(GLFWwindow* window, double xpos, double ypos) {
     InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-    inputManager->mouse_callback(window, xpos, ypos);
+    inputManager->mouseCallback(window, xpos, ypos);
 }
 
-void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+/**
+ * Mouse Movement Callback - Handles mouse drag operations for model manipulation
+ * 
+ * FLOW:
+ * 1. Check if any mouse interaction is active
+ * 2. Verify cursor remains within viewport bounds
+ * 3. Calculate movement delta from last position
+ * 4. Apply transformation based on interaction mode:
+ *    - Pan mode: Translate model in screen space
+ *    - Rotate mode: Rotate model with pitch/yaw constraints
+ * 5. Update last mouse position for next frame
+ */
+void InputManager::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     (void)window;
     
     if (_mouseInteraction == MouseInteraction::None) {
@@ -169,17 +207,28 @@ void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos) 
     }
 }
 
-void InputManager::scroll_callback_wrapper(GLFWwindow* window, double xoffset, double yoffset) {
+void InputManager::scrollCallbackWrapper(GLFWwindow* window, double xoffset, double yoffset) {
     InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-    inputManager->scroll_callback(window, xoffset, yoffset);
+    inputManager->scrollCallback(window, xoffset, yoffset);
 }
 
-void InputManager::key_callback_wrapper(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void InputManager::keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods) {
     InputManager* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-    inputManager->key_callback(window, key, scancode, action, mods);
+    inputManager->keyCallback(window, key, scancode, action, mods);
 }
 
-void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+/**
+ * Scroll Callback - Handles mouse wheel events for zoom control
+ * 
+ * FLOW:
+ * 1. Get current mouse position to check viewport bounds
+ * 2. Ignore scroll events outside the 3D viewport
+ * 3. Apply zoom based on current projection mode:
+ *    - Orthographic: Adjust zoom level (0.1x to 5.0x range)
+ *    - Perspective: Adjust field of view (1° to 45° range)
+ * 4. Clamp values to prevent extreme zoom levels
+ */
+void InputManager::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     (void)window;
     (void)xoffset;
     
@@ -202,7 +251,23 @@ void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yo
     }
 }
 
-void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+/**
+ * Keyboard Callback - Handles keyboard shortcuts for application control
+ * 
+ * FLOW:
+ * 1. Check for key press events (ignore repeats and releases for most keys)
+ * 2. Execute corresponding action based on key:
+ *    - ESC: Close application
+ *    - V: Toggle wireframe mode (OBJ only)
+ *    - P: Toggle projection mode (perspective/orthographic)
+ *    - 1: Toggle auto-rotation
+ *    - R: Reset view to default
+ *    - X: Toggle vertex visualization
+ *    - C: Toggle CRT post-processing effect
+ *    - T: Toggle texture rendering mode
+ * 3. Trigger appropriate callback to notify other components
+ */
+void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     (void)scancode;
     (void)mods;
     
@@ -302,6 +367,20 @@ void InputManager::resetModelTransform() {
 
 void InputManager::processInput() {}
 
+/**
+ * Create Transformation Matrices - Generates Model-View-Projection matrices
+ * 
+ * FLOW:
+ * 1. Update auto-rotation if enabled (continuous Y-axis rotation)
+ * 2. Construct Model matrix:
+ *    - Apply translation (user panning)
+ *    - Apply rotations (X, Y, Z axes in order)
+ * 3. Construct View matrix using fixed camera (lookAt)
+ * 4. Construct Projection matrix based on mode:
+ *    - Orthographic: Use specialized projection for model type
+ *    - Perspective: Standard perspective projection with FOV
+ * 5. Store matrices for renderer access
+ */
 void InputManager::createMatrices() {
     if (_autoRotation) {
         _modelRotation.y += _autoRotationSpeed * _deltaTime;
@@ -333,6 +412,18 @@ void InputManager::createMatrices() {
     _projection = projection;
 }
 
+/**
+ * Create Orthographic Projection - Generates orthographic projection matrix for OBJ models
+ * 
+ * FLOW:
+ * 1. Calculate orthographic view size based on model bounding box diagonal
+ * 2. Apply zoom factor to scale the view volume
+ * 3. Calculate view bounds:
+ *    - Width adjusted for aspect ratio (left/right)
+ *    - Height maintains square proportions (top/bottom)
+ *    - Fixed near/far planes for general 3D models
+ * 4. Return GLM orthographic projection matrix
+ */
 glm::mat4 InputManager::createOrthographicProjection(float aspectRatio, float zoom) {
     float orthoSize = _boundingBox.getDiagonal() / zoom;
     
@@ -346,6 +437,20 @@ glm::mat4 InputManager::createOrthographicProjection(float aspectRatio, float zo
     return glm::ortho(left, right, bottom, top, nearPlane, farPlane);
 }
 
+/**
+ * Create Orthographic Projection for FDF - Specialized projection for heightmap visualization
+ * 
+ * FLOW:
+ * 1. Calculate actual map dimensions in world space
+ *    - Map width = columns × grid spacing
+ *    - Map height = rows × grid spacing
+ * 2. Apply fixed zoom factor optimized for heightmap viewing
+ * 3. Determine orthographic view bounds:
+ *    - Use maximum dimension to maintain proportions
+ *    - Adjust for aspect ratio to prevent distortion
+ *    - Set wide near/far planes for large height variations
+ * 4. Return projection matrix suited for top-down heightmap view
+ */
 glm::mat4 InputManager::createOrthographicProjectionForFDF(float aspectRatio, int mapRows, int mapCols, float spacing) {
     float mapWidth = mapCols * spacing;
     float mapHeight = mapRows * spacing;

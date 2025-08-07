@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 17:00:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 14:22:26 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:39:58 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,21 @@ PostProcessor::~PostProcessor() {
     cleanup();
 }
 
+/**
+ * Setup Framebuffer - Creates off-screen rendering target for post-processing
+ * 
+ * FLOW:
+ * 1. Generate and bind framebuffer object (FBO)
+ * 2. Create color texture attachment:
+ *    - Generate texture with screen dimensions
+ *    - Configure linear filtering for smooth sampling
+ *    - Attach as GL_COLOR_ATTACHMENT0
+ * 3. Create depth/stencil renderbuffer:
+ *    - Generate renderbuffer with GL_DEPTH24_STENCIL8 format
+ *    - Attach as GL_DEPTH_STENCIL_ATTACHMENT for depth testing
+ * 4. Validate framebuffer completeness
+ * 5. Unbind framebuffer to restore default framebuffer
+ */
 void PostProcessor::setupFramebuffer() {
     GLCall(glGenFramebuffers(1, &_framebuffer));
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer));
@@ -53,6 +68,20 @@ void PostProcessor::setupFramebuffer() {
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
+/**
+ * Setup Quad - Creates fullscreen quad geometry for post-processing
+ * 
+ * FLOW:
+ * 1. Define quad vertices in NDC space (-1 to 1):
+ *    - Two triangles covering entire screen
+ *    - Each vertex: position (x,y) + texture coordinates (u,v)
+ * 2. Generate and bind VAO for quad state management
+ * 3. Create VBO and upload quad vertex data
+ * 4. Configure vertex attributes:
+ *    - Attribute 0: Position (vec2) for screen coordinates
+ *    - Attribute 1: UV coordinates (vec2) for texture sampling
+ * 5. Unbind buffers and log completion status
+ */
 void PostProcessor::setupQuad() {
     float quadVertices[] = {
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -92,6 +121,22 @@ void PostProcessor::unbind() {
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
+/**
+ * Render Post-Process Effects - Applies screen-space effects to framebuffer
+ * 
+ * FLOW:
+ * 1. Validate quad VAO availability for rendering
+ * 2. Save and disable depth testing (2D screen-space rendering)
+ * 3. Activate post-process shader and set uniforms:
+ *    - Screen texture sampler
+ *    - Time for animated effects
+ *    - Screen resolution for pixel-perfect effects
+ *    - CRT effect enable/disable flag
+ * 4. Bind framebuffer color texture to texture unit 0
+ * 5. Render fullscreen quad with 6 vertices (2 triangles)
+ * 6. Restore previous OpenGL state (depth testing)
+ * 7. Clean up bindings
+ */
 void PostProcessor::render() {
     if (_quadVAO == 0) {
         std::cerr << "Error: quadVAO is 0!" << std::endl;

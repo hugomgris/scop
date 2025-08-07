@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 14:23:03 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:40:03 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,18 @@ void Shader::compile() {
     use();
 }
 
+/**
+ * Parse Shader File - Extracts vertex and fragment shaders from combined file
+ * 
+ * FLOW:
+ * 1. Open shader file and validate file stream
+ * 2. Initialize shader type tracking (NONE, VERTEX, FRAGMENT)
+ * 3. Process file line by line:
+ *    - Detect "#shader vertex" directive to switch to vertex mode
+ *    - Detect "#shader fragment" directive to switch to fragment mode
+ *    - Accumulate shader source code in appropriate stringstream
+ * 4. Return structured shader source with separate vertex and fragment strings
+ */
 ShaderProgramSource Shader::parseShader(const std::string &filepath) {
 	std::ifstream stream(filepath);
 	if (!stream.is_open()) {
@@ -65,6 +77,18 @@ ShaderProgramSource Shader::parseShader(const std::string &filepath) {
 	return { ss[0].str(), ss[1].str() };
 }
 
+/**
+ * Compile Shader - Compiles individual shader (vertex or fragment)
+ * 
+ * FLOW:
+ * 1. Create shader object of specified type (GL_VERTEX_SHADER/GL_FRAGMENT_SHADER)
+ * 2. Set shader source code from string
+ * 3. Compile shader using OpenGL
+ * 4. Check compilation status:
+ *    - If successful: Return shader ID
+ *    - If failed: Extract and log error message, cleanup shader, return 0
+ * 5. Handle compilation errors with detailed logging
+ */
 unsigned int Shader::compileShader(unsigned int type, const std::string &source) {
 	unsigned int id = glCreateShader(type);
 	const char *src = source.c_str();
@@ -89,6 +113,18 @@ unsigned int Shader::compileShader(unsigned int type, const std::string &source)
 	return (id);
 }
 
+/**
+ * Create Shader Program - Links vertex and fragment shaders into program
+ * 
+ * FLOW:
+ * 1. Create OpenGL shader program object
+ * 2. Compile vertex and fragment shaders from source strings
+ * 3. Attach compiled shaders to program
+ * 4. Link shaders into executable program
+ * 5. Validate program for current OpenGL state
+ * 6. Clean up individual shader objects (no longer needed after linking)
+ * 7. Return linked program ID for rendering use
+ */
 unsigned int Shader::createShader(const std::string &vertexShader, const std::string &fragmentShader) {
 	unsigned int program = glCreateProgram();
 	_vs = compileShader(GL_VERTEX_SHADER, vertexShader);

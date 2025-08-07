@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 10:39:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:32:03 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,21 @@ void Parser::parse(const std::string &filePath) {
     }
 }
 
+/**
+ * Parse OBJ File - Processes Wavefront OBJ files with full material support
+ * 
+ * FLOW:
+ * 1. Open file and initialize parsing state (materials, bounding box)
+ * 2. Read file line by line, parsing different element types:
+ *    - 'v': Vertex positions (update bounding box and Z-range)
+ *    - 'vt': Texture coordinates (flip Y for OpenGL)
+ *    - 'vn': Normal vectors
+ *    - 'mtllib': Material library reference (trigger MTL parsing)
+ *    - 'usemtl': Material usage (create/switch material groups)
+ *    - 'f': Face definitions (triangulate and create indices)
+ * 3. Handle missing data (generate UVs and normals if needed)
+ * 4. Report parsing results and optimal camera distance
+ */
 void Parser::parseOBJ(const std::string &filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -238,6 +253,20 @@ void Parser::parseOBJ(const std::string &filePath) {
     std::cout << "Optimal camera distance: " << getOptimalCameraDistance() << std::endl;
 }
 
+/**
+ * Parse MTL File - Processes Wavefront material library files
+ * 
+ * FLOW:
+ * 1. Open MTL file (warn if unavailable, continue without materials)
+ * 2. Read line by line, parsing material definitions:
+ *    - 'newmtl': Start new material definition
+ *    - Color properties: Ka (ambient), Kd (diffuse), Ks (specular), Ke (emission)
+ *    - Material properties: Ns (shininess), d/Tr (opacity), Ni (refractive index)
+ *    - Texture maps: map_Kd (diffuse), map_Ka (ambient), map_Ks (specular)
+ *    - Advanced maps: map_Bump (normal), map_d (opacity), disp (displacement)
+ * 3. Resolve relative texture paths to absolute paths
+ * 4. Store complete material definitions for rendering
+ */
 void Parser::parseMTL(const std::string &filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -274,7 +303,6 @@ void Parser::parseMTL(const std::string &filePath) {
             } else if (type == "Ke") {
                 iss >> currentMaterial->emission.r >> currentMaterial->emission.g >> currentMaterial->emission.b;
             } else if (type == "Ns") {
-                // Shininess
                 iss >> currentMaterial->shininess;
             } else if (type == "d" || type == "Tr") {
                 float value;
@@ -329,6 +357,23 @@ void Parser::parseMTL(const std::string &filePath) {
     std::cout << "Parsed " << _materials.size() << " materials from " << filePath << std::endl;
 }
 
+/**
+ * Parse FDF File - Processes FDF heightmap files for wireframe visualization
+ * 
+ * FLOW:
+ * 1. Pre-scan file to determine grid dimensions and calculate spacing
+ * 2. Read heightmap data line by line into 2D array:
+ *    - Parse integers (ignore color values after commas)
+ *    - Build complete grid layout in memory
+ * 3. Generate 3D vertex positions:
+ *    - X/Z: Grid coordinates centered and scaled by spacing
+ *    - Y: Height values scaled by Y-spacing
+ *    - Update bounding box for camera positioning
+ * 4. Create line indices for wireframe rendering:
+ *    - Horizontal connections (row-wise)
+ *    - Vertical connections (column-wise)
+ * 5. Report grid dimensions and optimal camera distance
+ */
 void Parser::parseFDF(const std::string &filePath) {
     countFDFPositions(filePath);
     calculateFDFSpacing();
@@ -427,6 +472,20 @@ void Parser::countFDFPositions(const std::string &filePath) {
     }
 }
 
+/**
+ * Calculate FDF Spacing - Determines optimal grid spacing for heightmap visualization
+ * 
+ * FLOW:
+ * 1. Start with base unit spacing (1.0f)
+ * 2. Apply size-based scaling:
+ *    - Large grids (>100): Reduce to 0.25x or 0.5x
+ *    - Very large dimensions: Scale proportionally to fit 20-unit target
+ * 3. Set axis-specific spacing:
+ *    - X/Z spacing: Horizontal grid separation
+ *    - Y spacing: Height scaling (10% of horizontal for reasonable proportions)
+ * 4. Apply minimum spacing constraints to prevent degenerate geometry
+ * 5. Special handling for massive maps (>500): Multiply by 5x for visibility
+ */
 void Parser::calculateFDFSpacing() {
     const float BASE_SPACING = 1.0f;
     
@@ -493,6 +552,22 @@ int Parser::getMaterialIndex(const std::string& name) const {
 	return -1;
 }
 
+/**
+ * Calculate Vertex Normals - Generates smooth normals for models without normal data
+ * 
+ * FLOW:
+ * 1. Initialize accumulation arrays (normal sum and count per vertex)
+ * 2. Iterate through triangles (every 3 indices):
+ *    - Extract triangle vertex positions
+ *    - Calculate face normal using cross product of edge vectors
+ *    - Accumulate face normal to each vertex of the triangle
+ *    - Track contribution count for averaging
+ * 3. Average accumulated normals:
+ *    - Divide accumulated normal by contribution count
+ *    - Normalize resulting vector for unit length
+ *    - Use default up vector (0,1,0) for orphaned vertices
+ * 4. Update vertex data with calculated smooth normals
+ */
 void Parser::calculateNormals() {
     std::vector<glm::vec3> vertexNormals(_vertices.size(), glm::vec3(0.0f));
     std::vector<int> normalCounts(_vertices.size(), 0);
@@ -572,6 +647,20 @@ float Parser::getOptimalCameraDistance() const {
     return distance;
 }
 
+/**
+ * Generate Planar UV Coordinates - Creates texture coordinates by projecting model onto dominant plane
+ * 
+ * FLOW:
+ * 1. Analyze bounding box dimensions to find two largest axes
+ * 2. Determine optimal projection plane:
+ *    - U axis: Largest dimension of bounding box
+ *    - V axis: Second largest dimension
+ * 3. For each vertex:
+ *    - Extract coordinates along chosen U and V axes
+ *    - Normalize to [0,1] range using bounding box extents
+ *    - Apply linear mapping from world space to texture space
+ * 4. Store generated UV coordinates in vertex data
+ */
 void Parser::generatePlanarUVs() {
     std::cout << "Generating planar UV coordinates..." << std::endl;
     
@@ -602,6 +691,22 @@ void Parser::generatePlanarUVs() {
     }
 }
 
+/**
+ * Generate Spherical UV Coordinates - Creates texture coordinates using spherical projection
+ * 
+ * FLOW:
+ * 1. Calculate model center point from bounding box
+ * 2. For each vertex:
+ *    - Translate position relative to center
+ *    - Normalize to unit sphere (handle zero-length vectors)
+ *    - Convert to spherical coordinates:
+ *      • Theta (azimuth): Angle around Y-axis using atan2(z, x)
+ *      • Phi (elevation): Angle from Y-axis using acos(y)
+ *    - Map spherical angles to UV space:
+ *      • U: Theta normalized to [0,1] range
+ *      • V: Phi normalized to [0,1] range
+ * 3. Handle degenerate cases (center points) with default UV (0.5, 0.5)
+ */
 void Parser::generateSphericalUVs() {
     std::cout << "Generating spherical UV coordinates..." << std::endl;
     
@@ -627,6 +732,21 @@ void Parser::generateSphericalUVs() {
     }
 }
 
+/**
+ * Generate Cubic UV Coordinates - Creates texture coordinates using cubic projection
+ * 
+ * FLOW:
+ * 1. Calculate model center point from bounding box
+ * 2. For each vertex:
+ *    - Translate position relative to center
+ *    - Calculate absolute values to determine dominant axis
+ *    - Project onto dominant cube face:
+ *      • X-dominant: Project YZ onto face using Z/X and Y/X ratios
+ *      • Y-dominant: Project XZ onto face using X/Y and Z/Y ratios  
+ *      • Z-dominant: Project XY onto face using X/Z and Y/Z ratios
+ *    - Normalize projected coordinates to [0,1] UV range
+ * 3. Store UV coordinates for texture mapping
+ */
 void Parser::generateCubicUVs() {
     std::cout << "Generating cubic UV coordinates..." << std::endl;
     

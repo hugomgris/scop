@@ -6,9 +6,21 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:54 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 17:05:03 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:34:18 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+/**
+ * @file main.cpp
+ * @brief Entry point for the SCOP 3D model renderer application.
+ *
+ * This file orchestrates the initialization and execution of the SCOP rendering system.
+ * It handles command-line argument parsing, creates the rendering pipeline components
+ * (Parser, Mesh, Shader, Renderer), and launches the main application loop.
+ *
+ * The application supports both OBJ and FDF file formats with real-time rendering,
+ * texture management, and interactive controls for wireframe, vertex, and projection modes.
+ */
 
 #include <iostream>
 #include <string>
@@ -21,6 +33,25 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image/stb_image.h"
 
+/**
+ * @brief Main entry point for the SCOP application.
+ *
+ * Initializes the complete rendering pipeline:
+ * 1. Validates command-line arguments
+ * 2. Creates and configures the Parser for file format detection
+ * 3. Parses the input file (OBJ or FDF) into vertex/index data
+ * 4. Builds the Mesh from parsed geometry data
+ * 5. Compiles and links the 3D shader program
+ * 6. Creates the Renderer with shader binding
+ * 7. Launches the main App with UI, input handling, and render loop
+ *
+ * @param argc Number of command-line arguments
+ * @param argv Array of command-line argument strings
+ * @return int Exit code (0 for success, 1 for error)
+ *
+ * @throws std::exception Various exceptions from file parsing, OpenGL initialization, 
+ *                        or shader compilation failures
+ */
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <path_to_obj_file>\n";

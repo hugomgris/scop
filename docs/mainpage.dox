@@ -1,27 +1,87 @@
 /** 
- * @mainpage SCOP documentation
+ * @mainpage SCOP Documentation
  * 
  * @section intro Introduction
- * Welcome to the documentation for **FDF++**. This project is a 3D wireframe renderer that supports various transformations and effects.
+ * Welcome to the documentation for **SCOP** (scope - as in having a view or vision). This project is a comprehensive 3D object visualization application 
+ * built with OpenGL in C++, featuring modular rendering, multiple display modes, multi-texture and multi-shader handling, and real-time interaction controls.
  * 
- * @section features Features
- * - Text map input or string-to-map generation managed by a @ref MapBuilder "Map Builder"
- * - @ref FDF "3D interactive rendering" (wireframe) of @ref HeightMap "Height Maps" using [**MLX42**](https://github.com/codam-coding-college/MLX42) library
- * - Full @ref Camera "Camera controls" (pan, zoom, rotate)
- * - Switchable @ref ColorManager "Color palettes"
- * - Several @ref VFX "Visual Effects" such as autorotation, jittering, wave distorsion, glitching, pulse waves and vortex distorsions.
- * - An array of @ref Projector "Geometrical Projections" that includes isometric, orthographic and recursive depth presentations, amongst others.
- * - A basic @ref UI "Interface" with the control scheme and render information.
+ * @section features Core Features
+ * - **Multi-format Support**: Complete @ref Parser "OBJ file parsing" with material support (.mtl) and FDF file parsing for heightmap visualization
+ * - **Advanced Rendering Pipeline**: Modern @ref Renderer "OpenGL rendering" with programmable @ref Shader "shaders" and custom @ref Mesh "wireframe implementation"
+ * - **Multiple Display Modes**: @ref Render "Solid, wireframe, line, and point visualization modes" with real-time switching
+ * - **Interactive Controls**: Full @ref InputManager "mouse and keyboard controls" for model manipulation, rotation, and zoom
+ * - **Material System**: @ref TextureLoader "Multi-texture material system" with automatic material grouping and texture binding
+ * - **Post-Processing Effects**: Custom @ref PostProcessor "CRT filter implementation" with barrel distortion, chromatic aberration, and scanlines
+ * - **Real-time UI**: Complete @ref UIManager "ImGui interface" with performance monitoring, render controls, and model information display
+ * - **Mathematical Foundations**: Comprehensive @ref Mesh "MVP matrix system" and Phong lighting model
+ * 
+ * @section rendering Rendering Modes
+ * - **Solid Mode**: Full 3D rendering with lighting and textures
+ * - **Wireframe Mode**: Complete triangle edge visualization using custom geometry decomposition
+ * - **Line Mode**: Original FDF-style line rendering for heightmap data
+ * - **Vertex Mode**: Point cloud visualization
+ * 
+ * @section pipeline Graphics Pipeline
+ * The SCOP rendering system follows a systematic flow:
+ * - @ref Parser "File Input & Parsing" (.obj/.fdf/.mtl)
+ * - @ref Mesh"Mesh Creation" (VBO/VAO/EBO setup)
+ * - @ref TextureLoader "Texture Loading" & @ref MaterialProcessor "Material Processing"
+ * - @ref Shader "Shader Compilation" & Linking
+ * - @ref Renderer "3D Rendering Pipeline"
+ * - @ref PostProcessor "Post-Processing Effects"
+ * - @ref UIManager "UI Overlay Rendering"
+ * 
+ * @section controls User Controls
+ * | Input | Action |
+ * |-------|--------|
+ * | `LMB` | Move model around viewport |
+ * | `RMB` | Rotate model on all axes |
+ * | `Scroll` | Zoom in/out |
+ * | `T` | Toggle texture visualization |
+ * | `V` | Toggle wireframe mode |
+ * | `X` | Toggle vertex visualization |
+ * | `P` | Toggle orthographic/perspective projection |
+ * | `R` | Reset model to default position |
+ * | `C` | Toggle CRT post-processing filter |
+ * | `1` | Toggle auto-rotation |
+ * | `Esc` | Exit application |
  * 
  * @section usage How to Use
- * - Run `"./FDF++ <map_file>"` to render a heightmap.
- * - Use the controls displayed to the left of the projection to manipulate the rendering.
+ * - **Build**: Run `make` to compile the project (automatically downloads GLM and ImGui dependencies)
+ * - **Execute**: Run `./scop <path_to_obj_file>` to load and visualize a 3D model
+ * - **Examples**: 
+ *   - `./scop resources/objects/42.obj`
+ *   - `./scop resources/objects/ninja/Ninja.obj` (includes materials and textures)
+ *   - `./scop resources/objects/teapot.obj`
  * 
- * @section structure Project Structure
- * - `src/` - Contains the source code (project classes, map handler and projection files)
- * - `includes/` - Header files
- * - `maps/` - Example maps
+ * @section architecture Project Architecture
+ * - `src/` - Core source code including parsers, renderers, and managers
+ * - `includes/` - Header files and class definitions
+ * - `shaders/` - GLSL vertex and fragment shader files
+ * - `resources/` - 3D models, textures, and test files
+ * - `img/` - Documentation screenshots and examples
+ * 
+ * @section performance Performance Features
+ * - **Indexed Rendering**: Efficient vertex reuse through Element Buffer Objects
+ * - **Material Grouping**: Minimized state changes during multi-material rendering
+ * - **GPU Optimization**: Direct OpenGL buffer management and depth testing
+ * - **Memory Efficiency**: Strategic use of GL_STATIC_DRAW for unchanging geometry
+ * 
+ * @section technical Technical Highlights
+ * - **Modern OpenGL**: Core profile 3.3+ with programmable shaders
+ * - **Custom Wireframe**: Manual triangle decomposition bypassing glPolygonMode limitations
+ * - **Framebuffer Usage**: Off-screen rendering for post-processing effects
+ * - **MVP Mathematics**: Model-View-Projection matrix transformations
+ * - **Phong Lighting**: Ambient, diffuse, and specular lighting calculations
  * 
  * @section links Additional Resources
- * - [GitHub Repository](https://github.com/hugomgris/fdfpp)
+ * - [GitHub Repository](https://github.com/hugomgris/scop)
+ * - [OpenGL Documentation](https://www.opengl.org/documentation/)
+ * - [GLM Mathematics Library](https://github.com/g-truc/glm)
+ * - [ImGui Interface Library](https://github.com/ocornut/imgui)
+ *
+ *@section screenshots Screenshots
+ *@image html Scop_screenshot_02.png "SCOP Main Interface - 3D Model Visualization with UI Controls"
+ *@image html Scop_screenshot_11.png "Multi-Texture Material System - Mario Head Model"
+ *@image html Scop_screenshot_04.png "Advanced UI Integration with Real-time Controls"
  */

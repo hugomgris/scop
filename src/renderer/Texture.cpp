@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:37:46 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/05 12:09:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:40:07 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,20 @@
 #include <stdexcept>
 #include <iostream>
 
+/**
+ * Texture Constructor - Loads image file and creates OpenGL texture
+ * 
+ * FLOW:
+ * 1. Initialize texture properties and load image using STB library
+ * 2. Validate image loading success and handle errors
+ * 3. Generate OpenGL texture object and bind for configuration
+ * 4. Set texture parameters:
+ *    - Linear filtering for smooth sampling
+ *    - Clamp to edge wrapping to prevent border artifacts
+ * 5. Upload image data to GPU as RGBA8 texture
+ * 6. Unbind texture and free CPU image memory
+ * 7. Throw exception if loading fails with detailed error info
+ */
 Texture::Texture(const std::string &path): _filePath(path),
 	_localBufer(nullptr), _width(0), _height(0), _BPP(0)
 {

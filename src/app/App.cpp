@@ -6,12 +6,24 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 16:00:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 17:13:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/App.hpp"
 
+/**
+ * App Constructor - Initializes the entire SCOP application
+ * 
+ * FLOW:
+ * 1. Initialize member variables and store references to core components
+ * 2. Set up GLFW (window management library)
+ * 3. Create OpenGL context and window
+ * 4. Initialize GLAD (OpenGL function loader)
+ * 5. Configure basic OpenGL settings
+ * 6. Create and initialize all subsystem managers
+ * 7. Set up UI callback system for user interaction
+ */
 App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parser)
     : _mode(mode), _parser(parser), _mesh(mesh), _shader(shader), _renderer(renderer), 
       _window(nullptr), _wireframeMode(false), _showVertices(false) {
@@ -56,7 +68,6 @@ App::App(int mode, Mesh *mesh, Shader *shader, Renderer *renderer, Parser *parse
         std::cerr << "Failed to initialize UI\n";
     }
 
-    // Ensure model is properly centered on startup
     _inputManager->resetView();
 
     setupUICallbacks();
@@ -70,6 +81,14 @@ App::~App() {
 	glfwTerminate();
 }
 
+/**
+ * Main Application Loop - The heart of the SCOP application
+ * 
+ * FLOW:
+ * 1. INITIALIZATION PHASE: Load textures and prepare rendering resources
+ * 2. MAIN LOOP: Process input → Update UI → Calculate viewport → Render scene → Present frame
+ * 3. Each frame performs: Input → UI Update → Viewport Setup → 3D Rendering → Post-Processing → UI Overlay → Buffer Swap
+ */
 void App::run() {
     if (!_window) return;
 
@@ -124,7 +143,6 @@ void App::run() {
         viewportWidth = std::max(viewportWidth, 1);
         viewportHeight = std::max(viewportHeight, 1);
         
-        // Calculate aspect ratio using actual viewport dimensions
         float aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
         
         _inputManager->setAspectRatio(aspectRatio);
@@ -159,7 +177,6 @@ void App::run() {
         );
         _inputManager->setViewportBounds(viewportBounds);
         
-        // Update PostProcessor size if needed
         if (viewportWidth > 0 && viewportHeight > 0) {
             static int lastWidth = 0, lastHeight = 0;
             if (lastWidth != viewportWidth || lastHeight != viewportHeight) {
@@ -169,19 +186,15 @@ void App::run() {
             }
         }
         
-        // Update time for CRT effect
         _postProcessor->updateTime(currentFrame);
         
-        // Bind PostProcessor framebuffer for off-screen 3D scene rendering
         _postProcessor->bind();
-        
-        // Ensure proper OpenGL state for 3D rendering
+
         glDisable(GL_SCISSOR_TEST);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glDepthMask(GL_TRUE);
-        
-        // Disable face culling for now to debug face rendering issues
+
         glDisable(GL_CULL_FACE);
         
         setClearColor(Colors::BLACK_CHARCOAL_1);
@@ -231,6 +244,18 @@ void App::run() {
     }
 }
 
+/**
+ * Multi-Material Rendering - Renders 3D models with multiple materials/textures
+ * 
+ * FLOW:
+ * 1. Iterate through each material group in the parsed model
+ * 2. For each group: Bind appropriate texture → Configure shader → Render geometry
+ * 3. Handle different rendering modes (wireframe, solid, lines)
+ * 4. Optionally render vertex points for debugging
+ * 
+ * This method enables complex models (like those from OBJ files with MTL materials)
+ * to display with proper texturing on different parts of the mesh.
+ */
 void App::renderWithMaterials() {
     const auto& materialGroups = _parser->getMaterialGroups();
 
@@ -300,10 +325,9 @@ void App::renderWithMaterials() {
                 glUniform3fv(viewPosLoc, 1, glm::value_ptr(_inputManager->getCameraPosition()));
                 
                 glUniform1i(textureLoc, 0);
-                glUniform1i(useTextureLoc, _useTexture ? 1 : 0);  // Use texture mode from state
+                glUniform1i(useTextureLoc, _useTexture ? 1 : 0);
             }
-            
-            // Use optimized static buffer for material rendering
+
             static unsigned int tempIBO = 0;
             if (tempIBO == 0) {
                 glGenBuffers(1, &tempIBO);
@@ -346,6 +370,17 @@ void App::setCurrentFile(const std::string& filename) {
     }
 }
 
+/**
+ * UI Callback Setup - Connects user interface controls to application logic
+ * 
+ * FLOW:
+ * 1. Set up InputManager callbacks (keyboard shortcuts)
+ * 2. Set up UIManager callbacks (UI control interactions)
+ * 3. Each callback triggers the corresponding handler method
+ * 
+ * This creates a bidirectional communication system where both keyboard
+ * shortcuts and UI controls can trigger the same application functions.
+ */
 void App::setupUICallbacks() {
     _inputManager->setProjectionToggleCallback([this](bool useOrtho) {
         this->handleProjectionToggle(useOrtho);
@@ -389,7 +424,7 @@ void App::setupUICallbacks() {
     
     _uiManager->onCRTModeChanged = [this](bool enableCRT) {
         this->handleCRTToggle(enableCRT);
-        // Also update InputManager state to keep them in sync
+        
         if (_inputManager) {
             _inputManager->setEnableCRT(enableCRT);
         }
