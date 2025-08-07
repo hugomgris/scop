@@ -349,6 +349,7 @@ for (const auto &materialGroup : materialGroups) {
 This reduces unnecessary texture swaps and makes Mario's head look like it’s 1997 again — specially with CRT filter ON.
 
 ![Mario's head model included exclusively for research purposes](img/Scop_screenshot_11.png)
+![Cue Inside_the_Castle_Walls-Super_Mario_64_OST-192kbps.mp3](img/Scop_screenshot_12.png)
 
 ## UI Integration
 
