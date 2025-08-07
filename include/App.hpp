@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 15:59:21 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ class App {
         bool _wireframeMode = false;
         bool _showVertices = false;
         bool _enableCRT = false;
+        bool _useTexture = false;
         
         // UI callback handlers
         void setupUICallbacks();
@@ -74,6 +75,7 @@ class App {
         void handleVertexToggle(bool showVertices);
         void handleAutoRotationToggle(bool autoRotation);
         void handleCRTToggle(bool enableCRT);
+        void handleTextureToggle(bool useTexture);
         void renderWithMaterials();
 
         glm::mat4 createProjectionMatrix();

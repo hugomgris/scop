@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 13:52:56 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 15:59:29 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ struct UIState {
     bool orthographicProjection = false;
     bool autoRotation = false;
     bool enableCRT = false;
+    bool useTexture = false;
     glm::vec3 cameraPosition{0.0f};
     
     // Mesh info
@@ -111,6 +112,7 @@ public:
     std::function<void(bool)> onProjectionModeChanged;
     std::function<void(bool)> onAutoRotationChanged;
     std::function<void(bool)> onCRTModeChanged;
+    std::function<void(bool)> onTextureModeChanged;
     std::function<void()> onResetCamera;
     std::function<void(const std::string&)> onLoadFile;
 };

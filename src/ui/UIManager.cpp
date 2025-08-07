@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:26:42 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:00:28 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,6 +228,14 @@ void UIManager::renderRenderingControls() {
             _state.enableCRT = crtEffect;
             if (onCRTModeChanged) {
                 onCRTModeChanged(crtEffect);
+            }
+        }
+
+        bool useTexture = _state.useTexture;
+        if (ImGui::Checkbox("Texture Mode [T]", &useTexture)) {
+            _state.useTexture = useTexture;
+            if (onTextureModeChanged) {
+                onTextureModeChanged(useTexture);
             }
         }
 

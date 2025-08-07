@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:50:59 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:33:00 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:00:27 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,6 +256,14 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
         }
     }
 
+    if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+        _useTexture = !_useTexture;
+        
+        if (_onTextureToggle) {
+            _onTextureToggle(_useTexture);
+        }
+    }
+
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
         resetView();
     }
@@ -271,6 +279,10 @@ void InputManager::setAutoRotationToggleCallback(std::function<void(bool)> callb
 
 void InputManager::setCRTToggleCallback(std::function<void(bool)> callback) {
     _onCRTToggle = callback;
+}
+
+void InputManager::setTextureToggleCallback(std::function<void(bool)> callback) {
+    _onTextureToggle = callback;
 }
 
 void InputManager::calculateOptimalCameraPosition() {

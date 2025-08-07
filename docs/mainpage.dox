@@ -1,0 +1,27 @@
+/** 
+ * @mainpage SCOP documentation
+ * 
+ * @section intro Introduction
+ * Welcome to the documentation for **FDF++**. This project is a 3D wireframe renderer that supports various transformations and effects.
+ * 
+ * @section features Features
+ * - Text map input or string-to-map generation managed by a @ref MapBuilder "Map Builder"
+ * - @ref FDF "3D interactive rendering" (wireframe) of @ref HeightMap "Height Maps" using [**MLX42**](https://github.com/codam-coding-college/MLX42) library
+ * - Full @ref Camera "Camera controls" (pan, zoom, rotate)
+ * - Switchable @ref ColorManager "Color palettes"
+ * - Several @ref VFX "Visual Effects" such as autorotation, jittering, wave distorsion, glitching, pulse waves and vortex distorsions.
+ * - An array of @ref Projector "Geometrical Projections" that includes isometric, orthographic and recursive depth presentations, amongst others.
+ * - A basic @ref UI "Interface" with the control scheme and render information.
+ * 
+ * @section usage How to Use
+ * - Run `"./FDF++ <map_file>"` to render a heightmap.
+ * - Use the controls displayed to the left of the projection to manipulate the rendering.
+ * 
+ * @section structure Project Structure
+ * - `src/` - Contains the source code (project classes, map handler and projection files)
+ * - `includes/` - Header files
+ * - `maps/` - Example maps
+ * 
+ * @section links Additional Resources
+ * - [GitHub Repository](https://github.com/hugomgris/fdfpp)
+ */

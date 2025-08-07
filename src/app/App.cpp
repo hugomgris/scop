@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 09:57:00 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:00:04 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,36 +202,29 @@ void App::run() {
                 std::cout << "Rendering with fallback (no materials)" << std::endl;
                 debugFallback = false;
             }
-            if (_currentTexture) {
+            if (_currentTexture && _useTexture) {
                 _currentTexture->Bind(0);
             }
-            _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices, _wireframeMode);
+            _renderer->draw(*_mesh, _mode, _inputManager->getCameraPosition(), _showVertices, _wireframeMode, _useTexture);
         }
         
-        // Unbind framebuffer and return to default framebuffer
         _postProcessor->unbind();
         
-        // Clear the entire screen first (using full window viewport)
         glViewport(0, 0, 1920, 1080);
         setClearColor(Colors::BLACK_CHARCOAL_1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        // Set CRT mode on the post processor
         _postProcessor->setEnableCRT(_uiManager->getState().enableCRT);
         
-        // Set viewport to match the render area for correct aspect ratio
         glViewport(viewportX, 1080 - viewportY - viewportHeight, viewportWidth, viewportHeight);
-        
-        // Disable depth testing and face culling for post-processing quad
+
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-        
-        // Render the post-processed 3D scene to the viewport area
+
         _postProcessor->render();
-        
-        // Now render UI on top of everything (reset to full viewport)
+
         glViewport(0, 0, 1920, 1080);
-        _uiManager->render();        // No need to render UI again or reset viewport since it's already done
+        _uiManager->render();
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
@@ -240,19 +233,17 @@ void App::run() {
 
 void App::renderWithMaterials() {
     const auto& materialGroups = _parser->getMaterialGroups();
-    
-    // Don't clear here - clearing is already done in the main render loop
-    // setClearColor(Colors::BLACK_CHARCOAL_1);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& group : materialGroups) {
         if (group.indices.empty()) continue;
         
-        auto textureIt = _materialTextures.find(group.materialIndex);
-        if (textureIt != _materialTextures.end()) {
-            textureIt->second->Bind(0);
-        } else if (_currentTexture) {
-            _currentTexture->Bind(0);
+        if (_useTexture) {
+            auto textureIt = _materialTextures.find(group.materialIndex);
+            if (textureIt != _materialTextures.end()) {
+                textureIt->second->Bind(0);
+            } else if (_currentTexture) {
+                _currentTexture->Bind(0);
+            }
         }
         
         _shader->use();
@@ -309,7 +300,7 @@ void App::renderWithMaterials() {
                 glUniform3fv(viewPosLoc, 1, glm::value_ptr(_inputManager->getCameraPosition()));
                 
                 glUniform1i(textureLoc, 0);
-                glUniform1i(useTextureLoc, 1);
+                glUniform1i(useTextureLoc, _useTexture ? 1 : 0);  // Use texture mode from state
             }
             
             // Use optimized static buffer for material rendering
@@ -376,6 +367,10 @@ void App::setupUICallbacks() {
         this->handleCRTToggle(enableCRT);
     });
     
+    _inputManager->setTextureToggleCallback([this](bool useTexture) {
+        this->handleTextureToggle(useTexture);
+    });
+    
     _uiManager->onWireframeModeChanged = [this](bool wireframeMode) {
         this->handleWireframeToggle(wireframeMode);
     };
@@ -398,6 +393,10 @@ void App::setupUICallbacks() {
         if (_inputManager) {
             _inputManager->setEnableCRT(enableCRT);
         }
+    };
+    
+    _uiManager->onTextureModeChanged = [this](bool useTexture) {
+        this->handleTextureToggle(useTexture);
     };
     
     _uiManager->onResetCamera = [this]() {
@@ -483,4 +482,16 @@ void App::handleCRTToggle(bool enableCRT) {
     }
     
     std::cout << "CRT Effect " << (_enableCRT ? "ON" : "OFF") << std::endl;
+}
+
+void App::handleTextureToggle(bool useTexture) {
+    _useTexture = useTexture;
+    
+    if (_uiManager) {
+        UIState currentState = _uiManager->getState();
+        currentState.useTexture = _useTexture;
+        _uiManager->updateState(currentState);
+    }
+    
+    std::cout << "Texture mode " << (_useTexture ? "ON" : "OFF") << std::endl;
 }

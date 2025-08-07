@@ -152,6 +152,7 @@ make list-models
 | `LMB` | Move the model around the viewport |
 | `RMB` | Freely rotate the model around all its axes |
 | `Scroll` | Zoom in/out |
+| `T` | Toggle texture visualization |
 | `V` | Toggle wireframe mode |
 | `X` | Toggle vertex visualization |
 | `P` | Toggle orthographic/perspective projection |

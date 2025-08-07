@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:15:57 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 15:59:26 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,13 @@ class InputManager {
 		std::function<void(bool)> _onVertexToggle;
 		std::function<void(bool)> _onAutoRotationToggle;
 		std::function<void(bool)> _onCRTToggle;
+		std::function<void(bool)> _onTextureToggle;
 		
 		bool _useOrthographic = false;
 		bool _wireframeMode = false;
 		bool _showVertices = false;
 		bool _enableCRT = false;
+		bool _useTexture = false;
 		
 		// Dynamic aspect ratio for UI rendering
 		float _aspectRatio = 1920.0f / 1080.0f;
@@ -126,6 +128,7 @@ class InputManager {
 		void setVertexToggleCallback(std::function<void(bool)> callback);
 		void setAutoRotationToggleCallback(std::function<void(bool)> callback);
 		void setCRTToggleCallback(std::function<void(bool)> callback);
+		void setTextureToggleCallback(std::function<void(bool)> callback);
 		
 		// Getters for current state
 		bool isUsingOrthographic() const { return _useOrthographic; }
