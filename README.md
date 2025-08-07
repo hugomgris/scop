@@ -59,7 +59,7 @@ SCOP (which stands for "scope" - as in having a view or vision) is a comprehensi
 
 ![Main Project Screenshot](img/Scop_screenshot_02.png)
 ![Main Project Screenshot](img/Scop_screenshot_08.png)
-![Main Project Screenshot](Scop_screenshot_09.png)
+![Main Project Screenshot](img/Scop_screenshot_09.png)
 
 ## Build & Execution Instructions
 
@@ -298,7 +298,8 @@ This approach guarantees you *see* every edge, every time. You also gain control
 > It’s not just better — it’s *cooler*.  
 > Toggle CRT and Wireframe mode on the `resources/objects/ninja/Ninja.obj` model, and be transported to a retro-futuristic realm of awesome.
 
-![We're not tools of the Government, or any one else...— Gray Fox, Death's prisoner and undying shadow in the world of lights](img/screenshot_03.png)
+![We're not tools of the Government, or any one else...— Gray Fox, Death's prisoner and undying shadow in the world of lights](img/Scop_screenshot_10.png)
+![One last gift](img/Scop_screenshot_07.png)
 
 ---
 
@@ -347,7 +348,7 @@ for (const auto &materialGroup : materialGroups) {
 
 This reduces unnecessary texture swaps and makes Mario's head look like it’s 1997 again — specially with CRT filter ON.
 
-![Mario's head model included exclusively for research purposes](img/screenshot_03.png)
+![Mario's head model included exclusively for research purposes](img/Scop_screenshot_11.png)
 
 ## UI Integration
 
@@ -544,6 +545,9 @@ OUTPUT LAYER:
 └─────────────────────────────────────────────────────────┘
 ```
 
+![Main Project Screenshot](img/Scop_screenshot_04.png)
+![Main Project Screenshot](img/Scop_screenshot_06.png)
+
 ## Project Takeaways
 
 This project demonstrates competence in:
@@ -596,3 +600,5 @@ This project is part of the 42 School Outer Core curriculum. Educational use onl
 - **ImGui** for immediate mode GUI
 - **stb_image** for texture loading
 - **GLFW** for window management and input handling
+
+![Main Project Screenshot](img/Scop_screenshot_03.png)
