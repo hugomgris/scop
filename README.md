@@ -349,7 +349,7 @@ This reduces unnecessary texture swaps and makes Mario's head look like it’s 1
 
 ![Mario's head model included exclusively for research purposes](img/screenshot_03.png)
 
-## UI Integration 🖥️
+## UI Integration
 
 The real-time UI interface, powered by ImGui, provides dynamic control and feedback. It is divided in two main frames, a left pannel with different render and performance related information, and a main window where the model is displayed.
 
