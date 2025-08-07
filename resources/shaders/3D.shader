@@ -62,7 +62,7 @@ void main()
         return;
     }
     
-    vec3 ambient = 0.2 * u_lightColor;
+    vec3 ambient = 0.5 * u_lightColor;
 
     vec3 baseColor;
     if (useTexture) {

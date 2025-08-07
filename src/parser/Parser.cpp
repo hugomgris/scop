@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:40 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:21:06 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 10:39:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,14 @@ void Parser::parseOBJ(const std::string &filePath) {
         } else if (type == "vt") {
             hasTexCoords = true;
             glm::vec2 textCoord;
-            iss >> textCoord.x >> textCoord.y;
+            std::string restOfLine;
+            std::getline(iss, restOfLine);
+            std::istringstream coordStream(restOfLine);
+            
+            coordStream >> textCoord.x >> textCoord.y;
+            
+            textCoord.y = 1.0f - textCoord.y;
+            
             _texCoords.push_back(textCoord);
         } else if (type == "vn") {
             hasNormals = true;
@@ -121,7 +128,6 @@ void Parser::parseOBJ(const std::string &filePath) {
             std::string objDir = filePath.substr(0, filePath.find_last_of("/\\"));
             std::string mtlPath = objDir + "/" + mtlFileName;
             
-            // Parse the MTL file
             parseMTL(mtlPath);
         } else if (type == "usemtl") {
             std::string materialName;

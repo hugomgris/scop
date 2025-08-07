@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:41 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/06 15:31:51 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/07 09:57:00 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void App::run() {
     
     if (!_currentTexture) {
         std::cout << "No material textures found, using fallback texture" << std::endl;
-        _currentTexture = _textureLoader->loadTexture("resources/textures/Unicorns.png");
+        _currentTexture = _textureLoader->loadTexture("resources/textures/Unicorn.png");
     }
 
     if (_currentTexture) {
