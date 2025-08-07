@@ -455,19 +455,6 @@ glEnable(GL_DEPTH_TEST);
 glEnable(GL_CULL_FACE);
 ```
 
-## Project Takeaways
-
-This project demonstrates competence in:
-
-1. OpenGL graphics pipeline implementation  
-2. 3D mathematics and transformations  
-3. Shader programming with GLSL  
-4. Efficient file parsing (OBJ, MTL, FDF)  
-5. Real-time UI integration  
-6. Performance-oriented rendering  
-7. Modular, maintainable software architecture
-
-
 ## Execution Pipeline Structure
 
 The SCOP rendering pipeline follows a systematic flow from file input to final frame display:
@@ -556,6 +543,18 @@ OUTPUT LAYER:
 │ └─────────────┘    └─────────────┘    └─────────────┘   │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## Project Takeaways
+
+This project demonstrates competence in:
+
+1. OpenGL graphics pipeline implementation  
+2. 3D mathematics and transformations  
+3. Shader programming with GLSL  
+4. Efficient file parsing (OBJ, MTL, FDF)  
+5. Real-time UI integration  
+6. Performance-oriented rendering  
+7. Modular, maintainable software architecture
 
 ## Troubleshooting
 
