@@ -7,7 +7,7 @@
 ---
 
 <p align="center">
-    <img src="{https://github.com/hugomgris/FDFPP/blob/main/img/screenshot_01.png}" />
+    <img src="{https://cdn-icons-png.flaticon.com/512/1077/1077183.png}" />
     <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/hugomgris/scop?color=lightblue" />
     <img alt="Code language count" src="https://img.shields.io/github/languages/count/hugomgris/scop?color=yellow" />
     <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/hugomgris/scop?color=blue" />
