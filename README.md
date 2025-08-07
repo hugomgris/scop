@@ -12,10 +12,8 @@
     <img alt="Code language count" src="https://img.shields.io/github/languages/count/hugomgris/scop?color=yellow" />
     <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/hugomgris/scop?color=blue" />
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/hugomgris/scop?color=green" />
-    <img alt="GitHub issues" src="https://img.shields.io/github/issues/hugomgris/scop?color=orange" />
-    <img alt="GitHub forks" src="https://img.shields.io/github/forks/hugomgris/scop?color=purple" />
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/hugomgris/scop?color=gold" />
-    <img alt="GitHub license" src="https://img.shields.io/github/license/hugomgris/scop?color=gray" />
+    <img alt="GitHub license" src="https://img.shields.io/badge/OpenGL-FFFFFF?style=for-the-badge&logo=opengl" />
 </p>
 
 ## Table of Contents
