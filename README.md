@@ -7,14 +7,15 @@
 ---
 
 <p align="center">
+    <img alt="OpenGL" src="https://img.shields.io/badge/OpenGL-FFFFFF?style=for-the-badge&logo=opengl" />
+    <img alt="C++" src="https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white" />
+</p>
+<p align="center">
     <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/hugomgris/scop?color=lightblue" />
     <img alt="Code language count" src="https://img.shields.io/github/languages/count/hugomgris/scop?color=yellow" />
     <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/hugomgris/scop?color=blue" />
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/hugomgris/scop?color=green" />
-    <img alt="GitHub issues" src="https://img.shields.io/github/issues/hugomgris/scop?color=orange" />
-    <img alt="GitHub forks" src="https://img.shields.io/github/forks/hugomgris/scop?color=purple" />
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/hugomgris/scop?color=gold" />
-    <img alt="GitHub license" src="https://img.shields.io/github/license/hugomgris/scop?color=gray" />
 </p>
 
 ## Table of Contents
@@ -40,9 +41,9 @@
   - [Post-Processing: CRT Effect](#post-processing-crt-effect)
   - [Mathematical Foundations](#mathematical-foundations)
   - [Performance Optimization Strategies](#performance-optimization-strategies)
-- [Project Takeaways](#project-takeaways)
 - [Execution Pipeline Structure](#execution-pipeline-structure)
 - [Project Architecture](#project-architecture)
+- [Project Takeaways](#project-takeaways)
 - [Troubleshooting](#troubleshooting)
 - [Documentation](#documentation)
 - [Performance Considerations](#performance-considerations)
@@ -56,9 +57,9 @@ SCOP (which stands for "scope" - as in having a view or vision) is a comprehensi
 
 ## Preview
 
-![Main Project Screenshot](img/screenshot_01.png)
-![Main Project Screenshot](img/screenshot_02.png)
-![Main Project Screenshot](img/screenshot_03.png)
+![Main Project Screenshot](img/Scop_screenshot_02.png)
+![Main Project Screenshot](img/Scop_screenshot_08.png)
+![Main Project Screenshot](Scop_screenshot_09.png)
 
 ## Build & Execution Instructions
 
@@ -454,19 +455,6 @@ glEnable(GL_DEPTH_TEST);
 glEnable(GL_CULL_FACE);
 ```
 
-## Project Takeaways
-
-This project demonstrates competence in:
-
-1. OpenGL graphics pipeline implementation  
-2. 3D mathematics and transformations  
-3. Shader programming with GLSL  
-4. Efficient file parsing (OBJ, MTL, FDF)  
-5. Real-time UI integration  
-6. Performance-oriented rendering  
-7. Modular, maintainable software architecture
-
-
 ## Execution Pipeline Structure
 
 The SCOP rendering pipeline follows a systematic flow from file input to final frame display:
@@ -555,6 +543,18 @@ OUTPUT LAYER:
 │ └─────────────┘    └─────────────┘    └─────────────┘   │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## Project Takeaways
+
+This project demonstrates competence in:
+
+1. OpenGL graphics pipeline implementation  
+2. 3D mathematics and transformations  
+3. Shader programming with GLSL  
+4. Efficient file parsing (OBJ, MTL, FDF)  
+5. Real-time UI integration  
+6. Performance-oriented rendering  
+7. Modular, maintainable software architecture
 
 ## Troubleshooting
 
