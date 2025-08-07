@@ -57,9 +57,9 @@ SCOP (which stands for "scope" - as in having a view or vision) is a comprehensi
 
 ## Preview
 
-![Main Project Screenshot](img/screenshot_01.png)
-![Main Project Screenshot](img/screenshot_02.png)
-![Main Project Screenshot](img/screenshot_03.png)
+![Main Project Screenshot](img/Scop_screenshot_02.png)
+![Main Project Screenshot](img/Scop_screenshot_08.png)
+![Main Project Screenshot](Scop_screenshot_09.png)
 
 ## Build & Execution Instructions
 
