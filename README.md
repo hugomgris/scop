@@ -327,7 +327,7 @@ Fragment shaders are where the *style* lives. They define how every pixel inside
 
 This project has two main fragment shaders:
 - One for standard rendering (diffuse, ambient, specular, etc)
-- One for CRT-style post-processing (lens distortion, chromatic aberration, scanlines, you name it)
+- One for CRT-style post-processing (lens distortion, chromatic aberration, scanlines, ...)
 
 ```glsl
 vec3 result = (ambient + diffuse) * texture(u_texture, TexCoord).rgb;
