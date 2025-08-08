@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:30:00 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 17:40:23 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/08 09:36:52 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,9 +339,6 @@ void UIManager::renderPerformanceStats() {
         ImGui::PlotLines("##FPS", fps_history, 100, fps_history_offset, 
                         nullptr, 0.0f, 120.0f, ImVec2(0, 80));
     }
-}
-
-    );
 }
 
 /**

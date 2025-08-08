@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:16:08 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 16:51:18 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/08 09:39:38 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class Renderer {
         Shader* _shader;
 
     public:
-        Renderer(Shader* shader);
+        Renderer(Shader *shader);
         
         void setMatrices(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
 
