@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:47:39 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/07 17:24:36 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/08 09:33:42 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,14 +110,14 @@ class InputManager {
 		void resetView();
 
 		// Static callbacks
-		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-		static void mouse_button_callback_wrapper(GLFWwindow* window, int button, int action, int mods);
-		static void mouse_callback_wrapper(GLFWwindow* window, double xpos, double ypos);
+		static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+		static void mouseButtonCallbackWrapper(GLFWwindow* window, int button, int action, int mods);
+		static void mouseCallbackWrapper(GLFWwindow* window, double xpos, double ypos);
 		static void scrollCallbackWrapper(GLFWwindow* window, double xoffset, double yoffset);
 		static void keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
 		
 		// Instance methods for callbacks
-		void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+		void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 		void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 		void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
