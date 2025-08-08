@@ -416,7 +416,9 @@ This allows for screen-wide effects to be applied in a single shader pass, rathe
 The CRT post-processing shader introduces a number of retro-inspired visual distortions:
 
 -**Barrel distortion**, to simulate curved CRT screens.
+
 -**Chromatic aberration**, for slight RGB channel separation.
+
 -**Scanlines**, because I like them and I can't be stopped.
 
 ```glsl
