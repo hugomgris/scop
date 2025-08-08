@@ -584,7 +584,7 @@ This project demonstrates competence in:
 ## Documentation
 
 - **README.md** - This file, project overview and setup
-- **Code Documentation** - Generated with Doxygen (run `make docs`)
+- **Code Documentation** - Generated with Doxygen (run `make doxy`)
 
 ## Performance Considerations
 
