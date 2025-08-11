@@ -16,7 +16,7 @@
     <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/hugomgris/scop?color=blue" />
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/hugomgris/scop?color=green" />
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/hugomgris/scop?color=gold" />
-   <a href="https://linktr.ee/hugomgris"><img src="containers/frontend/static/logos/Linktree-Emblem.png" alt="Check my other works" style="height: 20px;" /></a>
+   <a href="https://linktr.ee/hugomgris"><img src="[containers/frontend/static/logos/Linktree-Emblem.png](https://imgur.com/a/XrVoQ99)" alt="Check my other works" style="height: 20px;" /></a>
 </p>
 
 ## Table of Contents
